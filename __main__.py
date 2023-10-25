@@ -1,14 +1,9 @@
 import uvicorn
-from settings import (
-    DEVELOPMENT,
-    APP_HOST,
-    APP_PORT,
-    APP_WORKERS_COUNT
-)
+from src.core.config import settings
 
 
 uvicorn.run("main:app",
-            host=APP_HOST,
-            port=APP_PORT,
-            workers=APP_WORKERS_COUNT,
-            reload=DEVELOPMENT)
+            host=settings.app_host,
+            port=settings.app_port,
+            workers=settings.app_workers_count,
+            reload=settings.development)

@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE users (
-    id UUID DEFAULT uuid_generate_v4(),
+    id UUID DEFAULT public.uuid_generate_v4(),
     username VARCHAR(255) NOT NULL,
     hashed_password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT date_trunc('seconds', now()::timestamp),
@@ -9,7 +9,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE projects (
-    id UUID DEFAULT uuid_generate_v4(),
+    id UUID DEFAULT public.uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     user_id UUID,
@@ -20,7 +20,7 @@ CREATE TABLE projects (
 );
 
 CREATE TABLE tasks (
-    id UUID DEFAULT uuid_generate_v4(),
+    id UUID DEFAULT public.uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status VARCHAR(20) NOT NULL,
@@ -35,8 +35,8 @@ CREATE TABLE tasks (
     CONSTRAINT fk_projects FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE comments (
-    id UUID DEFAULT uuid_generate_v4(),
+CREATE TABLE taskcomments (
+    id UUID DEFAULT public.uuid_generate_v4(),
     content TEXT NOT NULL,
     user_id UUID,
     task_id UUID,

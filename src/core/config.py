@@ -9,6 +9,18 @@ class Config(BaseSettings):
     app_host: str
     app_port: int
     app_workers_count: int
+    db_host: str
+    db_port: int
+    db_user: str
+    db_name: str
+    db_password: str
 
 
-app_settings = Config()
+    def get_sqlalchemy_db_url(self) -> str:
+        url: str = f"postgresql+asyncpg://{self.db_user}:{self.db_password}@\
+{self.db_host}:{self.db_port}/{self.db_name}"
+        return url
+
+settings = Config()
+
+
