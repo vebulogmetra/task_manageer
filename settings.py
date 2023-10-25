@@ -1,15 +1,14 @@
-from dotenv import load_dotenv
-from os import environ
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class Config(BaseSettings):
+    model_config = SettingsConfigDict(env_file=('.env', '.env.stag', '.env.prod'),
+                                      env_file_encoding="utf-8",
+                                      extra='ignore')
+    development: bool
+    app_host: str
+    app_port: int
+    app_workers_count: int
 
-try:
-    load_dotenv()
-except Exception as err:
-    print("Envfile load error: \n", err)
 
-
-DEVELOPMENT: bool = bool(environ.get("DEVELOPMENT"))
-APP_HOST: str = environ.get("APP_HOST")
-APP_PORT: int = int(environ.get("APP_PORT"))
-APP_WORKERS_COUNT: int = int(environ.get("APP_WORKERS_COUNT"))
+app_settings = Config()
