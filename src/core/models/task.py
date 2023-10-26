@@ -15,14 +15,12 @@ class Task(Base):
             "CONCAT('New task ', substring(uuid_generate_v4()::text, 1, 5))"
         ),
     )
-    description: sao.Mapped[str] = sao.mapped_column(
-        sa.Text(), nullable=True, default="", server_default=""
-    )
+    description: sao.Mapped[str] = sao.mapped_column(sa.Text(), nullable=True)
     status: sao.Mapped[str] = sao.mapped_column(
         sa.String(32), default="created", server_default="created"
     )
-    priority: sao.Mapped[int] = sao.mapped_column(
-        sa.Integer(), default=1, server_default=1
+    priority: sao.Mapped[str] = sao.mapped_column(
+        sa.String(), default="low", server_default="low"
     )
     due_date: sao.Mapped[datetime.datetime]
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
