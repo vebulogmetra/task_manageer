@@ -1,13 +1,23 @@
 import datetime
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING
+from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
-from .base import Base
+from src.core.models.base import Base
+from src.core.models.mixins import UserRelationMixin
+
+if TYPE_CHECKING:
+    from src.core.models.task import Task
+    from src.core.models.user import User
 
 
-class Project(Base):
+class Project(Base, UserRelationMixin):
+    _user_id_nullable = False
+    _user_id_unique = False
+    _user_back_populates = "projects"
+
     name: sao.Mapped[str] = sao.mapped_column(
         sa.String(128),
         server_default=sa.text(
@@ -23,6 +33,5 @@ class Project(Base):
         server_default=sa.text("date_trunc('seconds', now()::timestamp)"),
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
     )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE")
-    )
+
+    tasks: sao.Mapped[list["Task"]] = sao.relationship(back_populates="project")

@@ -1,7 +1,7 @@
-from pathlib import Path
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from os import path
+from pathlib import Path
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 SETTINGS_DIR: str = Path(__file__).parent
 
@@ -16,6 +16,7 @@ class Config(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+    api_v1_prefix: str = "/api/v1"
     development: bool
     app_host: str
     app_port: int

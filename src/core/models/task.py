@@ -1,13 +1,21 @@
 import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
+from src.core.models.mixins import UserRelationMixin
+
 from .base import Base
 
+if TYPE_CHECKING:
+    from src.core.models.project import Project
 
-class Task(Base):
+
+class Task(Base, UserRelationMixin):
+    _user_back_populates = "tasks"
+
     title: sao.Mapped[str] = sao.mapped_column(
         sa.String(128),
         default=f"New task {uuid4().hex[:5]}",
@@ -31,12 +39,10 @@ class Task(Base):
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
     )
 
-    user_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE")
-    )
     project_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("projects.id", onupdate="CASCADE", ondelete="CASCADE")
     )
+    project: sao.Mapped["Project"] = sao.relationship(back_populates="tasks")
 
 
 class TaskComment(Base):
