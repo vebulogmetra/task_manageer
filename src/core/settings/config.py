@@ -1,10 +1,21 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from os import path
+
+
+SETTINGS_DIR: str = Path(__file__).parent
 
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_file=('.env', '.env.stag', '.env.prod'),
-                                      env_file_encoding="utf-8",
-                                      extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=(
+            path.join(SETTINGS_DIR, ".env"),
+            path.join(SETTINGS_DIR, ".env.stag"),
+            path.join(SETTINGS_DIR, ".env.prod"),
+        ),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
     development: bool
     app_host: str
     app_port: int
@@ -15,12 +26,10 @@ class Config(BaseSettings):
     db_name: str
     db_password: str
 
-
     def get_sqlalchemy_db_url(self) -> str:
         url: str = f"postgresql+asyncpg://{self.db_user}:{self.db_password}@\
 {self.db_host}:{self.db_port}/{self.db_name}"
         return url
 
+
 settings = Config()
-
-

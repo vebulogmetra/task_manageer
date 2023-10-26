@@ -12,6 +12,7 @@ async def lifespan(app: FastAPI):
         await connect.run_sync(Base.metadata.create_all)
     yield
 
+
 app: FastAPI = FastAPI(lifespan=lifespan)
 
 
