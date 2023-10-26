@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from src.core.models import Base
-from src.core.utils.database import db_helper
+from api_v1 import main_router as v1_router
+from src.core.settings.config import settings
 
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -13,6 +13,7 @@ from src.core.utils.database import db_helper
 
 
 app: FastAPI = FastAPI()
+app.include_router(router=v1_router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/")
