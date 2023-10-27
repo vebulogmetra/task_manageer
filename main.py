@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from api_v1 import main_router as v1_router
+from src.api_v1 import main_router as v1_router
 from src.core.settings.config import settings
 
 # @asynccontextmanager

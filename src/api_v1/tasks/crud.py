@@ -1,11 +1,10 @@
-from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.tasks.schemas import TaskCreate
+from src.api_v1.tasks.schemas import TaskCreate
 from src.core.models.task import Task, TaskComment
 
 

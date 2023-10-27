@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.projects.schemas import ProjectCreate
+from src.api_v1.projects.schemas import ProjectCreate
 from src.core.models.project import Project
 
 

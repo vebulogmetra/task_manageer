@@ -1,11 +1,10 @@
-from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.users.schemas import UserCreate
+from src.api_v1.users.schemas import UserCreate
 from src.core.models.user import User
 
 

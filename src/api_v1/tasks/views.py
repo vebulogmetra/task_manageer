@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.tasks import crud
-from api_v1.tasks.schemas import TaskCreate, TaskGet
+from src.api_v1.tasks import crud
+from src.api_v1.tasks.schemas import TaskCreate, TaskGet
 from src.core.utils.database import db_helper
 
 router = APIRouter()
