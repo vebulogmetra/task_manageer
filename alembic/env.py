@@ -6,7 +6,6 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
 from src.core.models import Base
 from src.core.settings.config import settings
 
@@ -29,7 +28,10 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", settings.get_sqlalchemy_db_url())
+sqlalchemy_url: str = f"{settings.db_alchemy_driver}://{settings.db_user}:{settings.db_password}@\
+{settings.db_host}:{settings.db_port}/{settings.db_name}"
+
+config.set_main_option("sqlalchemy.url", sqlalchemy_url)
 
 
 def run_migrations_offline() -> None:
