@@ -9,8 +9,6 @@ from sqlalchemy.ext.asyncio import (
 
 from src.core.settings.config import settings
 
-db_url: str = settings.get_sqlalchemy_db_url()
-
 
 class DatabaseHelper:
     def __init__(self, url: str, echo: bool = False):
@@ -40,4 +38,9 @@ class DatabaseHelper:
         await session.close()
 
 
-db_helper: DatabaseHelper = DatabaseHelper(url=db_url, echo=False)
+sqlalchemy_url: str = f"{settings.db_alchemy_driver}://{settings.db_user}:{settings.db_password}@\
+{settings.db_host}:{settings.db_port}/{settings.db_name}"
+
+db_helper: DatabaseHelper = DatabaseHelper(
+    url=sqlalchemy_url, echo=settings.debug_database
+)
