@@ -13,10 +13,12 @@ class Task(BaseModel):
     project_id: UUID
 
 
+class TaskCreate(Task):
+    pass
+
+
 class TaskGet(Task):
     id: UUID
-    # user: UserGet
-    # project: ProjectGet
     created_at: str
     updated_at: str
 
@@ -27,12 +29,11 @@ class TaskComment(BaseModel):
     task_id: UUID
 
 
-class TaskCreate(Task):
+class TaskCommentCreate(TaskComment):
     pass
 
 
 class TaskCommentGet(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    # user: UserGet
     created_at: str

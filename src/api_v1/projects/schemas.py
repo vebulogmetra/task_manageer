@@ -16,7 +16,5 @@ class ProjectCreate(Project):
 class ProjectGet(Project):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    # user: UserGet
-    # tasks: TaskGet
     created_at: str
     updated_at: str
