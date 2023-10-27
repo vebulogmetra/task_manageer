@@ -1,6 +1,5 @@
 import datetime
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
@@ -10,7 +9,6 @@ from src.core.models.mixins import UserRelationMixin
 
 if TYPE_CHECKING:
     from src.core.models.task import Task
-    from src.core.models.user import User
 
 
 class Project(Base, UserRelationMixin):
@@ -35,3 +33,9 @@ class Project(Base, UserRelationMixin):
     )
 
     tasks: sao.Mapped[list["Task"]] = sao.relationship(back_populates="project")
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(id={self.id}, name={self.name}, user_id={self.user_id})"
+
+    def __repr__(self):
+        return str(self)

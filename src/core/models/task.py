@@ -1,6 +1,6 @@
 import datetime
 from typing import TYPE_CHECKING
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
@@ -18,7 +18,7 @@ class Task(Base, UserRelationMixin):
 
     title: sao.Mapped[str] = sao.mapped_column(
         sa.String(128),
-        default=f"New task {uuid4().hex[:5]}",
+        # default=f"New task {uuid4().hex[:5]}",
         server_default=sa.text("concat('New task ', substr(md5(random()::text), 1,5))"),
     )
     description: sao.Mapped[str] = sao.mapped_column(sa.Text(), nullable=True)

@@ -21,3 +21,9 @@ class User(Base):
     profile: sao.Mapped["UserProfile"] = sao.relationship(back_populates="user")
     projects: sao.Mapped[list["Project"]] = sao.relationship(back_populates="user")
     tasks: sao.Mapped[list["Task"]] = sao.relationship(back_populates="user")
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(id={self.id}, username={self.username!r})"
+
+    def __repr__(self):
+        return str(self)
