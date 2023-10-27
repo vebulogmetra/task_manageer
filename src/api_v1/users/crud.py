@@ -1,27 +1,68 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from fastapi import HTTPException, status
+from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.users.schemas import UserCreate
+from src.api_v1.users.schemas import UserCreate, UserUpdate
 from src.core.models.user import User
+from src.core.utils.auth import pwd_hepler
+from src.core.utils.exceptions import users_not_found
+
+
+async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
+    user_data: dict = user_data.model_dump()
+    pwd_hash: str = pwd_hepler.get_password_hash(
+        password=user_data.pop("password", None)
+    )
+    user_data.update({"hashed_password": pwd_hash})
+    user = User(**user_data)
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)  # Если на стороне БД генерятся данные
+    return user
 
 
 async def get_users(db_session: AsyncSession) -> list[User]:
     stmt = select(User).order_by(User.created_at)
     result: Result = await db_session.execute(stmt)
     users: list[User] = result.scalars().all()
+    if users is None:
+        raise users_not_found
     return list(users)
 
 
 async def get_user(db_session: AsyncSession, user_id: UUID) -> User | None:
-    return await db_session.get(User, user_id)
-
-
-async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
-    user = User(**user_data.model_dump())
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)  # Если на стороне БД генертся данные
+    stmt = select(User).where(User.id == user_id)
+    user: User = await db_session.scalar(stmt)
+    if user is None:
+        raise users_not_found
     return user
+
+
+async def update_user(
+    db_session: AsyncSession, user_id: UUID, update_data: UserUpdate
+) -> User:
+    stmt = (
+        update(User)
+        .returning(User)
+        .where(User.id == user_id)
+        .values(**update_data.model_dump())
+    )
+
+    result: Result = await db_session.execute(stmt)
+    upd_user: User = result.scalar()
+    await db_session.commit()
+    # await db_session.refresh(upd_user)
+    return upd_user
+
+
+async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID | None:
+    stmt = delete(User).returning(User.id).where(User.id == user_id)
+    result: Result = await db_session.execute(stmt)
+    user_id: UUID | None = result.scalar()
+    if user_id is None:
+        raise users_not_found
+    await db_session.commit()
+    return user_id
