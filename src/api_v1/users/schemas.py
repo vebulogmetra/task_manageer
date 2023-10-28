@@ -21,8 +21,3 @@ class UserGet(User):
 
 class UserUpdate(User):
     pass
-
-
-class StatusMsg(BaseModel):
-    status: Optional[str] = "ok"
-    detail: Optional[str] = "Success"

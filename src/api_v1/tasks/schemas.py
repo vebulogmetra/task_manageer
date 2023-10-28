@@ -23,6 +23,10 @@ class TaskGet(Task):
     updated_at: str
 
 
+class TaskUpdate(Task):
+    pass
+
+
 class TaskComment(BaseModel):
     content: str
     user_id: UUID
@@ -30,6 +34,10 @@ class TaskComment(BaseModel):
 
 
 class TaskCommentCreate(TaskComment):
+    pass
+
+
+class TaskCommentUpdate(TaskComment):
     pass
 
 
