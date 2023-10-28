@@ -1,8 +1,11 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.projects import crud
-from src.api_v1.projects.schemas import ProjectCreate, ProjectGet
+from src.api_v1.projects.schemas import ProjectCreate, ProjectGet, ProjectUpdate
 from src.core.utils.database import db_helper
 
 router = APIRouter()
@@ -23,7 +26,7 @@ async def get_projects_handler(
     return await crud.get_projects(db_session=session)
 
 
-@router.get("/project/{project_id}/", response_model=ProjectGet)
+@router.get("/project/{project_id}", response_model=ProjectGet)
 async def get_project_by_id_handler(
     project_id: str,
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -35,16 +38,24 @@ async def get_project_by_id_handler(
         )
 
 
-@router.put("/update/{project_id}/")
+@router.put("/update/{project_id}", response_model=ProjectGet)
 async def update_project_handler(
-    updated_data: dict,
+    project_id: str,
+    update_data: ProjectUpdate,
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    pass
+    upd_project: ProjectGet = await crud.update_project(
+        db_session=session, project_id=project_id, update_data=update_data
+    )
+    return upd_project
 
 
-@router.delete("/delete/{project_id}/")
+@router.delete("/delete/{project_id}", response_model=StatusMsg)
 async def delete_project_handler(
+    project_id: str,
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    pass
+    deleted_project_id: UUID = await crud.delete_project(
+        db_session=session, project_id=project_id
+    )
+    return StatusMsg(detail=f"Deleted project_id: {deleted_project_id}")

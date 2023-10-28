@@ -32,7 +32,7 @@ async def get_tasks_handler(
     return await crud.get_tasks(db_session=session)
 
 
-@router.get("/task/{task_id}/", response_model=TaskGet)
+@router.get("/task/{task_id}", response_model=TaskGet)
 async def get_task_by_id_handler(
     task_id: str,
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -44,7 +44,7 @@ async def get_task_by_id_handler(
         )
 
 
-@router.put("/update/{task_id}/", response_model=TaskGet)
+@router.put("/update/{task_id}", response_model=TaskGet)
 async def update_task_handler(
     task_id: str,
     update_data: TaskUpdate,
@@ -56,7 +56,7 @@ async def update_task_handler(
     return upd_task
 
 
-@router.delete("/delete/{task_id}/", response_model=StatusMsg)
+@router.delete("/delete/{task_id}", response_model=StatusMsg)
 async def delete_task_handler(
     task_id: str,
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),

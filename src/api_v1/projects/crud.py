@@ -1,23 +1,12 @@
-from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.projects.schemas import ProjectCreate
+from src.api_v1.base.exceptions import projects_not_found
+from src.api_v1.projects.schemas import ProjectCreate, ProjectUpdate
 from src.core.models.project import Project
-
-
-async def get_projects(db_session: AsyncSession) -> list[Project]:
-    stmt = select(Project).order_by(Project.created_at)
-    result: Result = await db_session.execute(stmt)
-    projects: list[Project] = result.scalars().all()
-    return list(projects)
-
-
-async def get_project(db_session: AsyncSession, project_id: UUID) -> Project | None:
-    return await db_session.get(Project, project_id)
 
 
 async def create_project(
@@ -28,3 +17,40 @@ async def create_project(
     await db_session.commit()
     await db_session.refresh(project)  # Если на стороне БД генертся данные
     return project
+
+
+async def get_projects(db_session: AsyncSession) -> list[Project]:
+    stmt = select(Project).order_by(Project.created_at)
+    result: Result = await db_session.execute(stmt)
+    projects: list[Project] = result.scalars().all()
+    return list(projects)
+
+
+async def get_project(db_session: AsyncSession, project_id: UUID) -> Project | None:
+    project: Project = await db_session.get(Project, project_id)
+    if project is None:
+        raise projects_not_found
+    return project
+
+
+async def update_project(
+    db_session: AsyncSession, project_id: UUID, update_data: ProjectUpdate
+) -> Project:
+    stmt = (
+        update(Project)
+        .returning(Project)
+        .where(Project.id == project_id)
+        .values(**update_data.model_dump())
+    )
+    result: Result = await db_session.execute(stmt)
+    upd_project: Project = result.scalar()
+    db_session.commit()
+    return upd_project
+
+
+async def delete_project(db_session: AsyncSession, project_id: UUID) -> UUID:
+    stmt = delete(Project).returning(Project.id).where(Project.id == project_id)
+    project_id: UUID | None = await db_session.scalar(stmt)
+    if project_id is None:
+        raise projects_not_found
+    return project_id

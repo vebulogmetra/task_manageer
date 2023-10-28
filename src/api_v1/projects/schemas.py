@@ -18,3 +18,7 @@ class ProjectGet(Project):
     id: UUID
     created_at: str
     updated_at: str
+
+
+class ProjectUpdate(Project):
+    pass
