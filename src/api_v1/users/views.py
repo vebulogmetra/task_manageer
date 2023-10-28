@@ -1,10 +1,11 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.users import crud
-from src.api_v1.users.schemas import StatusMsg, UserCreate, UserGet, UserUpdate
+from src.api_v1.users.schemas import UserCreate, UserGet, UserUpdate
 from src.core.utils.database import db_helper
 
 router = APIRouter()

@@ -1,14 +1,13 @@
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.base.exceptions import users_not_found
 from src.api_v1.users.schemas import UserCreate, UserUpdate
 from src.core.models.user import User
 from src.core.utils.auth import pwd_hepler
-from src.core.utils.exceptions import users_not_found
 
 
 async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
@@ -33,7 +32,7 @@ async def get_users(db_session: AsyncSession) -> list[User]:
     return list(users)
 
 
-async def get_user(db_session: AsyncSession, user_id: UUID) -> User | None:
+async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
     stmt = select(User).where(User.id == user_id)
     user: User = await db_session.scalar(stmt)
     if user is None:
@@ -58,7 +57,7 @@ async def update_user(
     return upd_user
 
 
-async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID | None:
+async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID:
     stmt = delete(User).returning(User.id).where(User.id == user_id)
     result: Result = await db_session.execute(stmt)
     user_id: UUID | None = result.scalar()
