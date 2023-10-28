@@ -4,7 +4,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.base.exceptions import projects_not_found
+from src.api_v1.base.exceptions import custom_exc
 from src.api_v1.projects.schemas import ProjectCreate, ProjectUpdate
 from src.core.models.project import Project
 
@@ -23,13 +23,15 @@ async def get_projects(db_session: AsyncSession) -> list[Project]:
     stmt = select(Project).order_by(Project.created_at)
     result: Result = await db_session.execute(stmt)
     projects: list[Project] = result.scalars().all()
+    if projects is None:
+        raise custom_exc.generate_exception(entity_name=Project.__name__)
     return list(projects)
 
 
 async def get_project(db_session: AsyncSession, project_id: UUID) -> Project | None:
     project: Project = await db_session.get(Project, project_id)
     if project is None:
-        raise projects_not_found
+        raise custom_exc.generate_exception(entity_name=Project.__name__)
     return project
 
 
@@ -52,5 +54,5 @@ async def delete_project(db_session: AsyncSession, project_id: UUID) -> UUID:
     stmt = delete(Project).returning(Project.id).where(Project.id == project_id)
     project_id: UUID | None = await db_session.scalar(stmt)
     if project_id is None:
-        raise projects_not_found
+        raise custom_exc.generate_exception(entity_name=Project.__name__)
     return project_id

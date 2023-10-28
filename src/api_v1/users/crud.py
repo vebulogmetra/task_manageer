@@ -4,7 +4,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.base.exceptions import users_not_found
+from src.api_v1.base.exceptions import custom_exc
 from src.api_v1.users.schemas import UserCreate, UserUpdate
 from src.core.models.user import User
 from src.core.utils.auth import pwd_hepler
@@ -28,7 +28,7 @@ async def get_users(db_session: AsyncSession) -> list[User]:
     result: Result = await db_session.execute(stmt)
     users: list[User] = result.scalars().all()
     if users is None:
-        raise users_not_found
+        raise custom_exc.generate_exception(entity_name=User.__name__)
     return list(users)
 
 
@@ -36,7 +36,7 @@ async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
     stmt = select(User).where(User.id == user_id)
     user: User = await db_session.scalar(stmt)
     if user is None:
-        raise users_not_found
+        raise custom_exc.generate_exception(entity_name=User.__name__)
     return user
 
 
@@ -62,6 +62,6 @@ async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID:
     result: Result = await db_session.execute(stmt)
     user_id: UUID | None = result.scalar()
     if user_id is None:
-        raise users_not_found
+        raise custom_exc.generate_exception(entity_name=User.__name__)
     await db_session.commit()
     return user_id
