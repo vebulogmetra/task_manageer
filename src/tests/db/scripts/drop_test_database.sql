@@ -1,0 +1,1 @@
+DROP DATABASE taskmngr_test;
