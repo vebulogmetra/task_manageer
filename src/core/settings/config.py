@@ -31,6 +31,12 @@ class Config(BaseSettings):
     db_name: str
     db_password: str
 
+    test_db_host: str
+    test_db_port: int
+    test_db_user: str
+    test_db_name: str
+    test_db_password: str
+
 
 settings = Config()
 
