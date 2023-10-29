@@ -21,6 +21,7 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 black = "^23.10.1"
 pytest = "^7.4.3"
 flake8 = "^6.1.0"
+pexpect = "^4.8.0"
 
 [build-system]
 requires = ["poetry-core"]
