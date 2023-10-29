@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.projects import crud
 from src.api_v1.projects.schemas import ProjectCreate, ProjectGet, ProjectUpdate
-from src.core.utils.database import db_helper
+from src.core.utils.database import get_db
 
 router = APIRouter()
 
@@ -14,14 +14,14 @@ router = APIRouter()
 @router.post("/create", response_model=ProjectGet)
 async def create_project_handler(
     project_data: ProjectCreate,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     return await crud.create_project(db_session=session, project_data=project_data)
 
 
 @router.get("/projects", response_model=list[ProjectGet])
 async def get_projects_handler(
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     return await crud.get_projects(db_session=session)
 
@@ -29,7 +29,7 @@ async def get_projects_handler(
 @router.get("/project/{project_id}", response_model=ProjectGet)
 async def get_project_by_id_handler(
     project_id: str,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     project = crud.get_project(db_session=session, project_id=project_id)
     if project is None:
@@ -42,7 +42,7 @@ async def get_project_by_id_handler(
 async def update_project_handler(
     project_id: str,
     update_data: ProjectUpdate,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     upd_project: ProjectGet = await crud.update_project(
         db_session=session, project_id=project_id, update_data=update_data
@@ -53,7 +53,7 @@ async def update_project_handler(
 @router.delete("/delete/{project_id}", response_model=StatusMsg)
 async def delete_project_handler(
     project_id: str,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     deleted_project_id: UUID = await crud.delete_project(
         db_session=session, project_id=project_id

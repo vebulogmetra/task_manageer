@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.base.exceptions import custom_exc
@@ -33,9 +34,9 @@ async def get_users(db_session: AsyncSession) -> list[User]:
 
 
 async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
-    stmt = select(User).where(User.id == user_id)
-    user: User = await db_session.scalar(stmt)
-    if user is None:
+    try:
+        user: User = await db_session.get(User, user_id)
+    except NoResultFound:
         raise custom_exc.generate_exception(entity_name=User.__name__)
     return user
 

@@ -12,7 +12,7 @@ from src.api_v1.tasks.schemas import (
     TaskGet,
     TaskUpdate,
 )
-from src.core.utils.database import db_helper
+from src.core.utils.database import get_db
 
 router = APIRouter()
 
@@ -20,14 +20,14 @@ router = APIRouter()
 @router.post("/create", response_model=TaskGet)
 async def create_task_handler(
     task_data: TaskCreate,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     return await crud.create_task(db_session=session, task_data=task_data)
 
 
 @router.get("/tasks", response_model=list[TaskGet])
 async def get_tasks_handler(
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     return await crud.get_tasks(db_session=session)
 
@@ -35,7 +35,7 @@ async def get_tasks_handler(
 @router.get("/task/{task_id}", response_model=TaskGet)
 async def get_task_by_id_handler(
     task_id: str,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     task = crud.get_task(db_session=session, task_id=task_id)
     if task is None:
@@ -48,7 +48,7 @@ async def get_task_by_id_handler(
 async def update_task_handler(
     task_id: str,
     update_data: TaskUpdate,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     upd_task: TaskGet = await crud.update_task(
         db_session=session, task_id=task_id, update_data=update_data
@@ -59,7 +59,7 @@ async def update_task_handler(
 @router.delete("/delete/{task_id}", response_model=StatusMsg)
 async def delete_task_handler(
     task_id: str,
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    session: AsyncSession = Depends(get_db),
 ):
     deleted_task_id: UUID = await crud.delete_task(db_session=session, task_id=task_id)
     return StatusMsg(detail=f"Deleted task_id: {deleted_task_id}")
