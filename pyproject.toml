@@ -38,4 +38,10 @@ line_length = 120
 force_grid_wrap = 2
 
 [tool.pytest.ini_options]
+testpaths = "tests"
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test* *Tests"
+addopts = "-vv -x"
+pythonpath = ["."]
 asyncio_mode = "auto"
