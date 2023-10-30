@@ -12,7 +12,8 @@ from src.core.models.project import Project
 from src.core.models.task import Task, TaskComment
 from src.core.models.user import User
 from src.core.models.user_profile import UserProfile
-from src.core.utils.database import db_helper
+from src.core.settings.config import settings
+from src.core.utils.database import db_manager
 
 
 class CreateEntity:
@@ -217,7 +218,10 @@ class GetEntityWithRelations:
 
 
 async def run_without_create():
-    async with db_helper.session_factory() as session:
+    db_manager.init(
+        connection_url=settings.db_alchemy_url, echo=settings.debug_database
+    )
+    async with db_manager.scoped_session_dependency() as session:
         getter: GetEntity = GetEntity(session)
         getter_with: GetEntityWithRelations = GetEntityWithRelations(session)
         await getter.get_user_by_username(username="string")  # Not exists
@@ -234,7 +238,10 @@ async def run_without_create():
 
 
 async def run_create():
-    async with db_helper.session_factory() as session:
+    db_manager.init(
+        connection_url=settings.db_alchemy_url, echo=settings.debug_database
+    )
+    async with db_manager.scoped_session_dependency() as session:
         creater: CreateEntity = CreateEntity(session)
         creater_more: CreateMoreEntity = CreateMoreEntity(session)
         user_ivan: User = await creater.create_user(username="ivan")
@@ -262,28 +269,25 @@ async def run_create():
         )
 
         _: list[Task] = await creater_more.create_more_tasks(
-            session,
             user_john.id,
             project.id,
         )
 
         projects_ivan: list[Project] = await creater_more.create_more_projects(
-            session, user_ivan.id
+            user_ivan.id
         )
         projects_viktor: list[Project] = await creater_more.create_more_projects(
-            session, user_viktor.id
+            user_viktor.id
         )
         for pi in projects_ivan:
             user_id = random.choice([user_ivan.id, user_viktor.id, user_john.id])
             _: list[Task] = await creater_more.create_more_tasks(
-                session,
                 user_id,
                 pi.id,
             )
         for pv in projects_viktor:
             user_id = random.choice([user_ivan.id, user_viktor.id, user_john.id])
             _: list[Task] = await creater_more.create_more_tasks(
-                session,
                 user_id,
                 pv.id,
             )
