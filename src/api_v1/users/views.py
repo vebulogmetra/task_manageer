@@ -38,9 +38,7 @@ async def update_user_handler(
     update_data: UserUpdate,
     session: AsyncSession = Depends(get_db),
 ):
-    upd_user: UserGet = await crud.update_user(
-        db_session=session, user_id=user_id, update_data=update_data
-    )
+    upd_user: UserGet = await crud.update_user(db_session=session, user_id=user_id, update_data=update_data)
     return upd_user
 
 
@@ -49,7 +47,5 @@ async def delete_user_handler(
     user_id: str,
     session: AsyncSession = Depends(get_db),
 ):
-    deleted_user_id: UUID | None = await crud.delete_user(
-        db_session=session, user_id=user_id
-    )
+    deleted_user_id: UUID | None = await crud.delete_user(db_session=session, user_id=user_id)
     return StatusMsg(detail=f"Deleted user_id: {deleted_user_id}")

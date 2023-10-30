@@ -27,20 +27,14 @@ class CreateEntity:
         print(f"Created user: {user.username}")
         return user
 
-    async def create_user_profile(
-        self, user_id: str, first_name: str, last_name: str
-    ) -> UserProfile:
-        user_profile: UserProfile = UserProfile(
-            user_id=user_id, first_name=first_name, last_name=last_name
-        )
+    async def create_user_profile(self, user_id: str, first_name: str, last_name: str) -> UserProfile:
+        user_profile: UserProfile = UserProfile(user_id=user_id, first_name=first_name, last_name=last_name)
         self.session.add(user_profile)
         await self.session.commit()
         print(f"Created user_profile: {user_profile.id}")
         return user_profile
 
-    async def create_project(
-        self, user_id: str, name: str, description: str
-    ) -> Project:
+    async def create_project(self, user_id: str, name: str, description: str) -> Project:
         project: Project = Project(user_id=user_id, name=name, description=description)
         self.session.add(project)
         await self.session.commit()
@@ -119,10 +113,7 @@ class CreateMoreEntity:
             name = f"Projec Name {uuid4().hex}"
             description = f"Description {uuid4().hex}"
             generated_data.append((name, description))
-        projects = [
-            Project(user_id=user_id, name=name, description=descr)
-            for name, descr in generated_data
-        ]
+        projects = [Project(user_id=user_id, name=name, description=descr) for name, descr in generated_data]
         self.session.add_all(projects)
         await self.session.commit()
         print(f"Created projects: {projects}")
@@ -135,14 +126,8 @@ class CreateMoreEntity:
     ) -> list[Task]:
         due_dates: list[datetime] = []
         for _ in range(5):
-            due_dates.append(
-                datetime.now().replace(microsecond=0)
-                + timedelta(days=random.randint(1, 7))
-            )
-        tasks = [
-            Task(user_id=user_id, project_id=project_id, due_date=dd)
-            for dd in due_dates
-        ]
+            due_dates.append(datetime.now().replace(microsecond=0) + timedelta(days=random.randint(1, 7)))
+        tasks = [Task(user_id=user_id, project_id=project_id, due_date=dd) for dd in due_dates]
         self.session.add_all(tasks)
         await self.session.commit()
         print(f"Created tasks: {tasks}")
@@ -156,9 +141,7 @@ class CreateMoreEntity:
         contents: list[str] = []
         for _ in range(5):
             contents.append(f"Comment_{uuid4().hex[:8]}")
-        task_comments = [
-            TaskComment(user_id=user_id, task_id=task_id, content=co) for co in contents
-        ]
+        task_comments = [TaskComment(user_id=user_id, task_id=task_id, content=co) for co in contents]
         self.session.add_all(task_comments)
         await self.session.commit()
         print(f"Created task_comments: {task_comments}")
@@ -194,33 +177,23 @@ class GetEntityWithRelations:
         users: list[User] = await self.session.scalars(stmt)
         for user in users:
             print(f"User: {user.username}")
-            print(
-                f"User profile first name: {user.profile.first_name if user.profile else None}"
-            )
+            print(f"User profile first name: {user.profile.first_name if user.profile else None}")
         return users
 
     async def get_users_with_profiles_and_with_tasks(self) -> list[User]:
-        stmt = (
-            select(User)
-            .options(joinedload(User.profile), selectinload(User.tasks))
-            .order_by(User.id)
-        )
+        stmt = select(User).options(joinedload(User.profile), selectinload(User.tasks)).order_by(User.id)
         result: Result = await self.session.execute(stmt)
         users: list[User] = result.scalars()
         for user in users:
             print(f"User: {user.username}")
-            print(
-                f"User profile first_name: {user.profile.first_name if user.profile else None}"
-            )
+            print(f"User profile first_name: {user.profile.first_name if user.profile else None}")
             for ut in user.tasks:
                 print("- ", f"User task title: {ut.title}")
         return users
 
 
 async def run_without_create():
-    db_manager.init(
-        connection_url=settings.db_alchemy_url, echo=settings.debug_database
-    )
+    db_manager.init(connection_url=settings.db_alchemy_url, echo=settings.debug_database)
     async with db_manager.scoped_session_dependency() as session:
         getter: GetEntity = GetEntity(session)
         getter_with: GetEntityWithRelations = GetEntityWithRelations(session)
@@ -238,21 +211,15 @@ async def run_without_create():
 
 
 async def run_create():
-    db_manager.init(
-        connection_url=settings.db_alchemy_url, echo=settings.debug_database
-    )
+    db_manager.init(connection_url=settings.db_alchemy_url, echo=settings.debug_database)
     async with db_manager.scoped_session_dependency() as session:
         creater: CreateEntity = CreateEntity(session)
         creater_more: CreateMoreEntity = CreateMoreEntity(session)
         user_ivan: User = await creater.create_user(username="ivan")
         user_viktor: User = await creater.create_user(username="viktor")
         user_john: User = await creater.create_user(username="john")
-        await creater.create_user_profile(
-            user_id=user_ivan.id, first_name="Ivan", last_name="Jobs"
-        )
-        await creater.create_user_profile(
-            user_id=user_john.id, first_name="John", last_name="Doe"
-        )
+        await creater.create_user_profile(user_id=user_ivan.id, first_name="Ivan", last_name="Jobs")
+        await creater.create_user_profile(user_id=user_john.id, first_name="John", last_name="Doe")
         project: Project = await creater.create_project(
             user_id=user_ivan.id,
             name="IvanProject",
@@ -273,12 +240,8 @@ async def run_create():
             project.id,
         )
 
-        projects_ivan: list[Project] = await creater_more.create_more_projects(
-            user_ivan.id
-        )
-        projects_viktor: list[Project] = await creater_more.create_more_projects(
-            user_viktor.id
-        )
+        projects_ivan: list[Project] = await creater_more.create_more_projects(user_ivan.id)
+        projects_viktor: list[Project] = await creater_more.create_more_projects(user_viktor.id)
         for pi in projects_ivan:
             user_id = random.choice([user_ivan.id, user_viktor.id, user_john.id])
             _: list[Task] = await creater_more.create_more_tasks(

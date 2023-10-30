@@ -33,9 +33,7 @@ async def get_project_by_id_handler(
 ):
     project = crud.get_project(db_session=session, project_id=project_id)
     if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found!"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found!")
 
 
 @router.put("/update/{project_id}", response_model=ProjectGet)
@@ -55,7 +53,5 @@ async def delete_project_handler(
     project_id: str,
     session: AsyncSession = Depends(get_db),
 ):
-    deleted_project_id: UUID = await crud.delete_project(
-        db_session=session, project_id=project_id
-    )
+    deleted_project_id: UUID = await crud.delete_project(db_session=session, project_id=project_id)
     return StatusMsg(detail=f"Deleted project_id: {deleted_project_id}")

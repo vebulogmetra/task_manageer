@@ -18,9 +18,7 @@ class Project(Base, UserRelationMixin):
 
     name: sao.Mapped[str] = sao.mapped_column(
         sa.String(128),
-        server_default=sa.text(
-            "CONCAT('New project ', substring(gen_random_uuid()::text, 1, 5))"
-        ),
+        server_default=sa.text("CONCAT('New project ', substring(gen_random_uuid()::text, 1, 5))"),
     )
 
     description: sao.Mapped[str] = sao.mapped_column(sa.Text(), nullable=True)

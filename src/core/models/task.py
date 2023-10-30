@@ -25,9 +25,7 @@ class Task(Base, UserRelationMixin):
     status: sao.Mapped[str] = sao.mapped_column(
         sa.String(32), default="created", server_default="created"
     )  # created, in_work, complete
-    priority: sao.Mapped[str] = sao.mapped_column(
-        sa.String(), default="low", server_default="low"
-    )  # low, medium, high
+    priority: sao.Mapped[str] = sao.mapped_column(sa.String(), default="low", server_default="low")  # low, medium, high
     due_date: sao.Mapped[datetime.datetime]
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
@@ -55,9 +53,5 @@ class TaskComment(Base):
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE")
-    )
-    task_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("tasks.id", onupdate="CASCADE", ondelete="CASCADE")
-    )
+    user_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"))
+    task_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("tasks.id", onupdate="CASCADE", ondelete="CASCADE"))

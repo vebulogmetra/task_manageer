@@ -33,15 +33,8 @@ async def get_task(db_session: AsyncSession, task_id: UUID) -> Task:
     return task
 
 
-async def update_task(
-    db_session: AsyncSession, task_id: UUID, update_data: TaskUpdate
-) -> Task:
-    stmt = (
-        update(Task)
-        .returning(Task)
-        .where(Task.id == task_id)
-        .values(**update_data.model_dump())
-    )
+async def update_task(db_session: AsyncSession, task_id: UUID, update_data: TaskUpdate) -> Task:
+    stmt = update(Task).returning(Task).where(Task.id == task_id).values(**update_data.model_dump())
     result: Result = await db_session.execute(stmt)
     upd_task: Task = result.scalar()
     db_session.commit()

@@ -14,6 +14,4 @@ class Base(DeclarativeBase):
     def __tablename__(cls) -> str:
         return f"{cls.__name__.lower()}s"
 
-    id: Mapped[UUID] = mapped_column(
-        primary_key=True, server_default=func.gen_random_uuid()
-    )
+    id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())

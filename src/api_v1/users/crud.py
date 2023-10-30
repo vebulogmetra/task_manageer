@@ -13,9 +13,7 @@ from src.core.utils.auth import pwd_hepler
 
 async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     user_data: dict = user_data.model_dump()
-    pwd_hash: str = pwd_hepler.get_password_hash(
-        password=user_data.pop("password", None)
-    )
+    pwd_hash: str = pwd_hepler.get_password_hash(password=user_data.pop("password", None))
     user_data.update({"hashed_password": pwd_hash})
     user = User(**user_data)
     db_session.add(user)
@@ -41,15 +39,8 @@ async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
     return user
 
 
-async def update_user(
-    db_session: AsyncSession, user_id: UUID, update_data: UserUpdate
-) -> User:
-    stmt = (
-        update(User)
-        .returning(User)
-        .where(User.id == user_id)
-        .values(**update_data.model_dump())
-    )
+async def update_user(db_session: AsyncSession, user_id: UUID, update_data: UserUpdate) -> User:
+    stmt = update(User).returning(User).where(User.id == user_id).values(**update_data.model_dump())
 
     result: Result = await db_session.execute(stmt)
     upd_user: User = result.scalar()

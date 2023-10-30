@@ -9,9 +9,7 @@ from src.api_v1.projects.schemas import ProjectCreate, ProjectUpdate
 from src.core.models.project import Project
 
 
-async def create_project(
-    db_session: AsyncSession, project_data: ProjectCreate
-) -> Project:
+async def create_project(db_session: AsyncSession, project_data: ProjectCreate) -> Project:
     project = Project(**project_data.model_dump())
     db_session.add(project)
     await db_session.commit()
@@ -35,15 +33,8 @@ async def get_project(db_session: AsyncSession, project_id: UUID) -> Project | N
     return project
 
 
-async def update_project(
-    db_session: AsyncSession, project_id: UUID, update_data: ProjectUpdate
-) -> Project:
-    stmt = (
-        update(Project)
-        .returning(Project)
-        .where(Project.id == project_id)
-        .values(**update_data.model_dump())
-    )
+async def update_project(db_session: AsyncSession, project_id: UUID, update_data: ProjectUpdate) -> Project:
+    stmt = update(Project).returning(Project).where(Project.id == project_id).values(**update_data.model_dump())
     result: Result = await db_session.execute(stmt)
     upd_project: Project = result.scalar()
     db_session.commit()
