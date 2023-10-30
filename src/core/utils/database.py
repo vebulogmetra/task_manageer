@@ -76,18 +76,3 @@ db_manager = DatabaseManager()
 async def get_db() -> AsyncIterator[AsyncSession]:
     async with db_manager.scoped_session_dependency() as session:
         yield session
-
-
-sqlalchemy_url: str = f"{settings.db_alchemy_driver}://{settings.db_user}:{settings.db_password}@\
-{settings.db_host}:{settings.db_port}/{settings.db_name}"
-
-# test_sqlalchemy_url: str = f"{settings.db_alchemy_driver}://{settings.test_db_user}:{settings.test_db_password}@\
-# {settings.test_db_host}:{settings.test_db_port}/{settings.test_db_name}"
-
-# db_helper: DatabaseHelper = DatabaseHelper(
-#     url=sqlalchemy_url, echo=settings.debug_database
-# )
-
-# test_db_helper: DatabaseHelper = DatabaseHelper(
-#     url=test_sqlalchemy_url, echo=settings.debug_database
-# )
