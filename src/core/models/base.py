@@ -1,5 +1,6 @@
 from uuid import UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, declared_attr
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 from sqlalchemy.sql import func
 
 
@@ -14,5 +15,5 @@ class Base(DeclarativeBase):
         return f"{cls.__name__.lower()}s"
 
     id: Mapped[UUID] = mapped_column(
-        primary_key=True, server_default=func.uuid_generate_v4()
+        primary_key=True, server_default=func.gen_random_uuid()
     )
