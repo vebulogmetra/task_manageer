@@ -7,7 +7,6 @@ import sqlalchemy.orm as sao
 from .base import Base
 
 if TYPE_CHECKING:
-    from src.core.models.task import Task
     from src.core.models.user_profile import UserProfile
 
 
@@ -32,7 +31,6 @@ class User(Base):
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
     profile: sao.Mapped["UserProfile"] = sao.relationship(back_populates="user")
-    tasks: sao.Mapped[list["Task"]] = sao.relationship(back_populates="user")
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, username={self.username})"
