@@ -18,14 +18,14 @@ class Config(BaseSettings):
     )
 
     development: bool
-    app_title: str = "API for TaskManageer"
-    app_version: str = "0.1.1"
-    api_v1_prefix: str = "/api/v1"
+    debug_database: bool
+
     app_host: str
     app_port: int
     app_workers_count: int
-
-    debug_database: bool
+    app_title: str = "API for TaskManageer"
+    app_version: str = "0.1.1"
+    api_v1_prefix: str = "/api/v1"
 
     db_host: str
     db_port: int
@@ -41,8 +41,10 @@ class Config(BaseSettings):
     test_db_password: str
     test_db_alchemy_url: str
 
+    jwt_secret: str
+    jwt_algorithm: str
+    jwt_refresh_expire_min: int
+    jwt_access_expire_min: int
+
 
 settings = Config()
-
-print(f"DEVELOPMENT: {settings.development}")
-print(f"DEBUG_DATABASE: {settings.debug_database}")
