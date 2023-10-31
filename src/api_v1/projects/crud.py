@@ -4,12 +4,14 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.base.exceptions import custom_exc
 from src.api_v1.projects.schemas import ProjectCreate, ProjectUpdate
 from src.core.models.project import Project
+from src.core.utils.exceptions import custom_exc
 
 
-async def create_project(db_session: AsyncSession, project_data: ProjectCreate) -> Project:
+async def create_project(
+    db_session: AsyncSession, project_data: ProjectCreate
+) -> Project:
     project = Project(**project_data.model_dump())
     db_session.add(project)
     await db_session.commit()
@@ -22,19 +24,26 @@ async def get_projects(db_session: AsyncSession) -> list[Project]:
     result: Result = await db_session.execute(stmt)
     projects: list[Project] = result.scalars().all()
     if projects is None:
-        raise custom_exc.generate_exception(entity_name=Project.__name__)
+        raise custom_exc.not_found(entity_name=Project.__name__)
     return list(projects)
 
 
 async def get_project(db_session: AsyncSession, project_id: UUID) -> Project | None:
     project: Project = await db_session.get(Project, project_id)
     if project is None:
-        raise custom_exc.generate_exception(entity_name=Project.__name__)
+        raise custom_exc.not_found(entity_name=Project.__name__)
     return project
 
 
-async def update_project(db_session: AsyncSession, project_id: UUID, update_data: ProjectUpdate) -> Project:
-    stmt = update(Project).returning(Project).where(Project.id == project_id).values(**update_data.model_dump())
+async def update_project(
+    db_session: AsyncSession, project_id: UUID, update_data: ProjectUpdate
+) -> Project:
+    stmt = (
+        update(Project)
+        .returning(Project)
+        .where(Project.id == project_id)
+        .values(**update_data.model_dump())
+    )
     result: Result = await db_session.execute(stmt)
     upd_project: Project = result.scalar()
     db_session.commit()
@@ -45,5 +54,5 @@ async def delete_project(db_session: AsyncSession, project_id: UUID) -> UUID:
     stmt = delete(Project).returning(Project.id).where(Project.id == project_id)
     project_id: UUID | None = await db_session.scalar(stmt)
     if project_id is None:
-        raise custom_exc.generate_exception(entity_name=Project.__name__)
+        raise custom_exc.not_found(entity_name=Project.__name__)
     return project_id

@@ -5,13 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.tasks import crud
-from src.api_v1.tasks.schemas import (
-    TaskCommentCreate,
-    TaskCommentGet,
-    TaskCreate,
-    TaskGet,
-    TaskUpdate,
-)
+from src.api_v1.tasks.schemas import TaskCreate, TaskGet, TaskUpdate
 from src.core.utils.database import get_db
 
 router = APIRouter()
@@ -39,7 +33,9 @@ async def get_task_by_id_handler(
 ):
     task = crud.get_task(db_session=session, task_id=task_id)
     if task is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found!")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found!"
+        )
 
 
 @router.put("/update/{task_id}", response_model=TaskGet)
@@ -48,7 +44,9 @@ async def update_task_handler(
     update_data: TaskUpdate,
     session: AsyncSession = Depends(get_db),
 ):
-    upd_task: TaskGet = await crud.update_task(db_session=session, task_id=task_id, update_data=update_data)
+    upd_task: TaskGet = await crud.update_task(
+        db_session=session, task_id=task_id, update_data=update_data
+    )
     return upd_task
 
 
