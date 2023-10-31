@@ -1,9 +1,0 @@
-[flake8]
-exclude = .git,.pytest_cache,tests,__pycache__,env,venv,logs,.venv
-max-line-length = 120
-max-complexity = 3
-ignore = E265, B008, F403, F401, F821, W503, D203
-
-[flake8]
-ignore = 
-exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
