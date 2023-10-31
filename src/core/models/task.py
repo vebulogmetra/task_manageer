@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from src.core.models.project import Project
 
 
-class Task(Base, UserRelationMixin):
+class Task(Base):
     _user_back_populates = "tasks"
 
     title: sao.Mapped[str] = sao.mapped_column(
@@ -25,8 +25,13 @@ class Task(Base, UserRelationMixin):
     status: sao.Mapped[str] = sao.mapped_column(
         sa.String(32), default="created", server_default="created"
     )  # created, in_work, complete
-    priority: sao.Mapped[str] = sao.mapped_column(sa.String(), default="low", server_default="low")  # low, medium, high
-    due_date: sao.Mapped[datetime.datetime]
+    priority: sao.Mapped[str] = sao.mapped_column(
+        sa.String(), default="low", server_default="low"
+    )  # low, medium, high
+    due_date: sao.Mapped[datetime.datetime] = sao.mapped_column(sa.DateTime())
+    creator_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
@@ -42,7 +47,7 @@ class Task(Base, UserRelationMixin):
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, \
-title={self.title}, user_id={self.user_id}, project_id={self.project_id})"
+title={self.title}, user_id={self.creator_id}, project_id={self.project_id})"
 
     def __repr__(self):
         return str(self)
@@ -53,5 +58,9 @@ class TaskComment(Base):
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"))
-    task_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("tasks.id", onupdate="CASCADE", ondelete="CASCADE"))
+    user_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE")
+    )
+    task_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("tasks.id", onupdate="CASCADE", ondelete="CASCADE")
+    )
