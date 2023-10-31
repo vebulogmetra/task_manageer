@@ -15,7 +15,7 @@ def init_app(init_db=True) -> FastAPI:
         )
 
         @asynccontextmanager
-        async def lifespan(app: FastAPI):
+        async def lifespan(app: FastAPI):  # noqa
             yield
             if db_manager._engine is not None:
                 await db_manager.close_connection()

@@ -2,6 +2,9 @@ import uvicorn
 
 from src.core.settings.config import settings
 
+print(f"DEVELOPMENT: {settings.development}")
+print(f"DEBUG_DATABASE: {settings.debug_database}")
+
 uvicorn.run(
     "main:server",
     host=settings.app_host,
