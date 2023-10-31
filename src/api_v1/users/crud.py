@@ -1,3 +1,4 @@
+import secrets
 from uuid import UUID
 
 from sqlalchemy import delete, exists, select, update
@@ -17,6 +18,22 @@ async def check_exists_user(
     stmt = select(exists().where(getattr(User, by_field) == by_value))
     user_exists = await db_session.scalar(stmt)
     return user_exists
+
+
+async def signup_user(db_session: AsyncSession, user_data: UserCreate) -> User:
+    user_data: dict = user_data.model_dump()
+    pwd_hash: str = pwd_hepler.get_password_hash(password=user_data.pop("password", None))
+    user_data.update({"hashed_password": pwd_hash})
+    user = User(**user_data)
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
+def after_signup_user():
+    # Send verification email
+    return secrets.token_hex(4)
 
 
 async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:

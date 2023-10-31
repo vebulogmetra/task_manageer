@@ -5,10 +5,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.users import crud
-from src.api_v1.users.schemas import UserCreate, UserGet, UserUpdate
+from src.api_v1.users.schemas import SignupGet, UserCreate, UserGet, UserUpdate
 from src.core.utils.database import get_db
 
 router = APIRouter()
+
+
+@router.post("/signup", response_model=SignupGet)
+async def signup_user_handler(
+    user_data: UserCreate,
+    session: AsyncSession = Depends(get_db),
+):
+    user_data.role = user_data.role.value
+    new_user: UserGet = await crud.signup_user(db_session=session, user_data=user_data)
+    verif_code: str = crud.after_signup_user()
+    return {"verif_code": verif_code, "new_user": new_user}
 
 
 @router.post("/create", response_model=UserGet)

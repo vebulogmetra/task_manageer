@@ -33,5 +33,10 @@ class UserGet(User):
     created_at: datetime
 
 
+class SignupGet(BaseModel):
+    verif_code: str
+    new_user: UserGet
+
+
 class UserUpdate(User):
     pass
