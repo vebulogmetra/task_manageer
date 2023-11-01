@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -31,7 +33,7 @@ class Project(Base):
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
     )
 
-    tasks: sao.Mapped[list["Task"]] = sao.relationship(back_populates="project")
+    tasks: sao.Mapped[list[Task]] = sao.relationship(back_populates="project")
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, name={self.name}, user_id={self.creator_id})"  # noqa

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from typing import TYPE_CHECKING, Optional
 
@@ -30,7 +32,7 @@ class User(Base):
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
-    profile: sao.Mapped["UserProfile"] = sao.relationship(back_populates="user")
+    profile: sao.Mapped[UserProfile] = sao.relationship(back_populates="user")
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, username={self.username})"

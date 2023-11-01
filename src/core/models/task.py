@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
-
-from src.core.models.mixins import UserRelationMixin
 
 from .base import Base
 
@@ -43,7 +43,7 @@ class Task(Base):
     project_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("projects.id", onupdate="CASCADE", ondelete="CASCADE")
     )
-    project: sao.Mapped["Project"] = sao.relationship(back_populates="tasks")
+    project: sao.Mapped[Project] = sao.relationship(back_populates="tasks")
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, \
