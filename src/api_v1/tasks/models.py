@@ -7,10 +7,12 @@ from uuid import UUID
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
-from .base import Base
+from src.api_v1.associates.models import users_tasks
+from src.api_v1.base.models import Base
 
 if TYPE_CHECKING:
-    from src.core.models.project import Project
+    from src.api_v1.projects.models import Project
+    from src.api_v1.users.models import User
 
 
 class Task(Base):
@@ -44,6 +46,9 @@ class Task(Base):
         sa.ForeignKey("projects.id", onupdate="CASCADE", ondelete="CASCADE")
     )
     project: sao.Mapped[Project] = sao.relationship(back_populates="tasks")
+    users: sao.Mapped[list[User]] = sao.relationship(
+        secondary=users_tasks, back_populates="tasks"
+    )
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, \

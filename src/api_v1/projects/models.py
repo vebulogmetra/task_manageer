@@ -7,10 +7,12 @@ from uuid import UUID
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
-from src.core.models.base import Base
+from src.api_v1.associates.models import users_projects
+from src.api_v1.base.models import Base
 
 if TYPE_CHECKING:
-    from src.core.models.task import Task
+    from src.api_v1.tasks.models import Task
+    from src.api_v1.users.models import User
 
 
 class Project(Base):
@@ -34,6 +36,9 @@ class Project(Base):
     )
 
     tasks: sao.Mapped[list[Task]] = sao.relationship(back_populates="project")
+    users: sao.Mapped[list[User]] = sao.relationship(
+        secondary=users_projects, back_populates="projects"
+    )
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, name={self.name}, user_id={self.creator_id})"  # noqa

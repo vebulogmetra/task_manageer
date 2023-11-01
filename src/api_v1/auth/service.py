@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import TokensPair
 from src.api_v1.users import crud as user_crud
-from src.core.models.user import User
-from src.core.utils.auth import jwt_helper, pwd_hepler
-from src.core.utils.exceptions import custom_exc
+from src.api_v1.users.models import User
+from src.utils.auth import jwt_helper, pwd_helper
+from src.utils.exceptions import custom_exc
 
 
 async def authenticate(
@@ -24,7 +24,7 @@ async def authenticate(
     if user is None:
         raise custom_exc.not_found(entity_name="User")
 
-    pwd_hepler.verify_password(
+    pwd_helper.verify_password(
         plain_password=password, hashed_password=user.hashed_password
     )
 

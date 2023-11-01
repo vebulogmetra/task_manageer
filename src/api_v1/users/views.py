@@ -5,8 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.users import crud
-from src.api_v1.users.schemas import SignupGet, UserCreate, UserGet, UserUpdate
-from src.core.utils.database import get_db
+from src.api_v1.users.schemas import (
+    SignupGet,
+    UserCreate,
+    UserGet,
+    UserProfileCreate,
+    UserProfileGet,
+    UserUpdate,
+)
+from src.utils.database import get_db
 
 router = APIRouter()
 
@@ -31,11 +38,26 @@ async def create_user_handler(
     return await crud.create_user(db_session=session, user_data=user_data)
 
 
+@router.post("/create_profile", response_model=UserProfileGet)
+async def create_profile_handler(
+    profile_data: UserProfileCreate,
+    session: AsyncSession = Depends(get_db),
+):
+    return await crud.create_user_profile(db_session=session, profile_data=profile_data)
+
+
 @router.get("/users", response_model=list[UserGet])
 async def get_users_handler(
     session: AsyncSession = Depends(get_db),
 ):
-    return await crud.get_users(db_session=session)
+    users = await crud.get_users(db_session=session)
+    for u in users:
+        print("-" * 30)
+        print("Profile: ", u.profile)
+        print("Tasks: ", u.tasks)
+        print("Projects: ", u.projects)
+        print("-" * 30)
+    return users
 
 
 @router.get("/user/{user_id}", response_model=UserGet)

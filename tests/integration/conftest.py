@@ -1,18 +1,24 @@
 import asyncio
-import os
 from contextlib import ExitStack
 
-import psycopg
 import pytest
 from fastapi.testclient import TestClient
 from pytest_postgresql import factories
 from pytest_postgresql.janitor import DatabaseJanitor
-from sqlalchemy.testing.entities import ComparableEntity
+from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src import init_app
-from src.core.models import Project, Task, User
-from src.core.settings.config import settings
-from src.core.utils.database import db_manager, get_db
+from src.api_v1.base.models import Base
+from src.core.config import settings
+from src.utils.database import db_manager, get_db
+
+
+async def db_create_all(connection: AsyncConnection):
+    await connection.run_sync(Base.metadata.create_all)
+
+
+async def db_drop_all(connection: AsyncConnection):
+    await connection.run_sync(Base.metadata.drop_all)
 
 
 # Init app without db
@@ -66,8 +72,8 @@ async def connection_test(test_db, event_loop):
 @pytest.fixture(scope="function", autouse=True)
 async def create_tables(connection_test):
     async with db_manager.get_connection() as connection:
-        await db_manager.drop_all(connection)
-        await db_manager.create_all(connection)
+        await db_drop_all(connection)
+        await db_create_all(connection)
 
 
 @pytest.fixture(scope="function", autouse=True)

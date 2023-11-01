@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import JWTToken, TokensPair
 from src.api_v1.auth.service import authenticate
-from src.core.utils.database import get_db
+from src.utils.database import get_db
 
 router = APIRouter()
 

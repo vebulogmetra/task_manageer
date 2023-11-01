@@ -4,9 +4,9 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.tasks.models import Task
 from src.api_v1.tasks.schemas import TaskCreate, TaskUpdate
-from src.core.models.task import Task
-from src.core.utils.exceptions import custom_exc
+from src.utils.exceptions import custom_exc
 
 
 async def create_task(db_session: AsyncSession, task_data: TaskCreate) -> Task:

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.tasks import crud
 from src.api_v1.tasks.schemas import TaskCreate, TaskGet, TaskUpdate
-from src.core.utils.database import get_db
+from src.utils.database import get_db
 
 router = APIRouter()
 

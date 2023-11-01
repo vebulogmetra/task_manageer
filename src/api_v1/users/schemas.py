@@ -27,6 +27,15 @@ class UserCreate(User):
     is_verified: Optional[bool] = False
 
 
+class UserProfileCreate(BaseModel):
+    first_name: str
+    last_name: str
+
+
+class UserProfileGet(BaseModel):
+    pass
+
+
 class UserGet(User):
     model_config = ConfigDict(from_attributes=True)
     id: UUID

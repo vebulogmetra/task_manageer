@@ -17,6 +17,4 @@ class CustomHTTPException:
         )
 
 
-status.HTTP_401_UNAUTHORIZED
-
 custom_exc: CustomHTTPException = CustomHTTPException()

@@ -11,9 +11,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.core.models import Base
-from src.core.settings.config import settings
-
 
 class DatabaseManager:
     def __init__(self):
@@ -61,13 +58,6 @@ class DatabaseManager:
                 yield scoped
         finally:
             await scoped_factory.remove()
-
-    # Used for testing
-    async def create_all(self, connection: AsyncConnection):
-        await connection.run_sync(Base.metadata.create_all)
-
-    async def drop_all(self, connection: AsyncConnection):
-        await connection.run_sync(Base.metadata.drop_all)
 
 
 db_manager = DatabaseManager()

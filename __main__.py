@@ -1,6 +1,6 @@
 import uvicorn
 
-from src.core.settings.config import settings
+from src.core.config import settings
 
 print(f"DEVELOPMENT: {settings.development}")
 print(f"DEBUG_DATABASE: {settings.debug_database}")

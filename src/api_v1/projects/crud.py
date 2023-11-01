@@ -4,9 +4,9 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.projects.models import Project
 from src.api_v1.projects.schemas import ProjectCreate, ProjectUpdate
-from src.core.models.project import Project
-from src.core.utils.exceptions import custom_exc
+from src.utils.exceptions import custom_exc
 
 
 async def create_project(

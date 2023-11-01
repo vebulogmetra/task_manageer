@@ -2,26 +2,29 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import pytz
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from src.core.settings.config import settings
-from src.core.utils.exceptions import custom_exc
+from src.core.config import settings
 
 
 class PwdHelper:
     pwd_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    http_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid password on username",
+    )
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         try:
             is_pwd_valid: bool = self.pwd_context.verify(plain_password, hashed_password)
         except (ValueError, TypeError):
-            raise custom_exc.unauthorized(detail="Invalid password on username")
+            raise self.http_exception
         else:
             if not is_pwd_valid:
-                raise custom_exc.unauthorized(detail="Invalid password on username")
+                raise self.http_exception
             return is_pwd_valid
 
     def get_password_hash(self, password: str) -> str:
@@ -30,6 +33,10 @@ class PwdHelper:
 
 class JWTHelper:
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+    http_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Bad token",
+    )
 
     @staticmethod
     def create_token(data: dict, type: str) -> str:
@@ -63,18 +70,18 @@ class JWTHelper:
             )
             return payload
         except JWTError:
-            raise custom_exc.unauthorized(detail="Invalid token")
+            raise self.http_exception
 
     def auth_depends(self, token: str = Depends(oauth2_scheme)) -> str:
         try:
             payload = self.validate_token(token)
             username: str = payload.get("sub")
             if username is None:
-                raise custom_exc.unauthorized(detail="Could not validate username")
+                raise self.http_exception
         except JWTError:
-            raise custom_exc.unauthorized(detail="Invalid token")
+            raise self.http_exception
         return username
 
 
-pwd_hepler: PwdHelper = PwdHelper()
+pwd_helper: PwdHelper = PwdHelper()
 jwt_helper: JWTHelper = JWTHelper()

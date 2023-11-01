@@ -2,8 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.core.settings.config import settings
-from src.core.utils.database import db_manager
+from src.core.config import settings
+from src.utils.database import db_manager
 
 
 def init_app(init_db=True) -> FastAPI:

@@ -5,11 +5,12 @@ from sqlalchemy import delete, exists, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
-from src.api_v1.users.schemas import UserCreate, UserUpdate
-from src.core.models.user import User
-from src.core.utils.auth import pwd_hepler
-from src.core.utils.exceptions import custom_exc
+from src.api_v1.users.models import User, UserProfile
+from src.api_v1.users.schemas import UserCreate, UserProfileCreate, UserUpdate
+from src.utils.auth import pwd_helper
+from src.utils.exceptions import custom_exc
 
 
 async def check_exists_user(
@@ -22,7 +23,7 @@ async def check_exists_user(
 
 async def signup_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     user_data: dict = user_data.model_dump()
-    pwd_hash: str = pwd_hepler.get_password_hash(password=user_data.pop("password", None))
+    pwd_hash: str = pwd_helper.get_password_hash(password=user_data.pop("password", None))
     user_data.update({"hashed_password": pwd_hash})
     user = User(**user_data)
     db_session.add(user)
@@ -38,7 +39,7 @@ def after_signup_user():
 
 async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     user_data: dict = user_data.model_dump()
-    pwd_hash: str = pwd_hepler.get_password_hash(password=user_data.pop("password", None))
+    pwd_hash: str = pwd_helper.get_password_hash(password=user_data.pop("password", None))
     user_data.update({"hashed_password": pwd_hash})
     user = User(**user_data)
     db_session.add(user)
@@ -47,8 +48,26 @@ async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     return user
 
 
+async def create_user_profile(
+    db_session: AsyncSession, profile_data: UserProfileCreate
+) -> UserProfile:
+    profile_data: dict = profile_data.model_dump()
+    profile = UserProfile(**profile_data)
+    db_session.add(profile)
+    await db_session.commit()
+    return profile
+
+
 async def get_users(db_session: AsyncSession) -> list[User]:
-    stmt = select(User).order_by(User.created_at)
+    stmt = (
+        select(User)
+        .options(
+            joinedload(User.profile),
+            selectinload(User.projects),
+            selectinload(User.tasks),
+        )
+        .order_by(User.created_at)
+    )
     result: Result = await db_session.execute(stmt)
     users: list[User] = result.scalars().all()
     if users is None:
@@ -57,14 +76,24 @@ async def get_users(db_session: AsyncSession) -> list[User]:
 
 
 async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
+    stmt = (
+        select(User)
+        .options(
+            joinedload(User.profile),
+            selectinload(User.projects),
+            selectinload(User.tasks),
+        )
+        .where(User.id == user_id)
+    )
     try:
-        user: User = await db_session.get(User, user_id)
+        user: User = await db_session.scalar(stmt)
     except NoResultFound:
         raise custom_exc.not_found(entity_name=User.__name__)
     return user
 
 
 async def get_user_by_email(db_session: AsyncSession, email: str) -> User:
+    # Not used in veiws
     stmt = select(User).where(User.email == email)
     user: User | None = await db_session.scalar(stmt)
     return user

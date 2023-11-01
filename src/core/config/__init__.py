@@ -3,6 +3,8 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+__all__ = "settings"
+
 SETTINGS_DIR: str = Path(__file__).parent
 
 
