@@ -1,12 +1,16 @@
+from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+
+from src.api_v1.associates.schemas import WithUser
 
 
 class Project(BaseModel):
     name: str
     description: str
-    user_id: UUID
+    creator_id: UUID
 
 
 class ProjectCreate(Project):
@@ -16,8 +20,9 @@ class ProjectCreate(Project):
 class ProjectGet(Project):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    created_at: str
-    updated_at: str
+    users: Optional[list[WithUser]]
+    created_at: datetime
+    updated_at: datetime
 
 
 class ProjectUpdate(Project):

@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from src.api_v1 import main_router as v1_router
 from src.core.config import settings
 from src.utils.database import db_manager
 
@@ -20,14 +21,12 @@ def init_app(init_db=True) -> FastAPI:
             if db_manager._engine is not None:
                 await db_manager.close_connection()
 
-    server = FastAPI(
+    server_app = FastAPI(
         title=settings.app_title,
         version=settings.app_version,
         lifespan=lifespan,
     )
 
-    from src.api_v1 import main_router as v1_router
+    server_app.include_router(router=v1_router, prefix=settings.api_v1_prefix)
 
-    server.include_router(router=v1_router, prefix=settings.api_v1_prefix)
-
-    return server
+    return server_app
