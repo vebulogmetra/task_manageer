@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -46,23 +47,34 @@ async def create_profile_handler(
     return await crud.create_user_profile(db_session=session, profile_data=profile_data)
 
 
-@router.get("/users", response_model=list[UserGet])
+@router.get("/users")
 async def get_users_handler(
+    profile: Optional[bool] = False,
+    projects: Optional[bool] = False,
+    tasks: Optional[bool] = False,
     session: AsyncSession = Depends(get_db),
 ):
-    users = await crud.get_users(db_session=session)
-    for u in users:
-        print("-" * 30)
-        print("Profile: ", u.profile)
-        print("Tasks: ", u.tasks)
-        print("Projects: ", u.projects)
-        print("-" * 30)
+    users = await crud.get_users(
+        db_session=session, profile=profile, projects=projects, tasks=tasks
+    )
     return users
 
 
-@router.get("/user/{user_id}", response_model=UserGet)
-async def get_user_by_id_handler(user_id: str, session: AsyncSession = Depends(get_db)):
-    user: UserGet = await crud.get_user(db_session=session, user_id=user_id)
+@router.get("/user/{user_id}")
+async def get_user_by_id_handler(
+    user_id: str,
+    profile: Optional[bool] = False,
+    projects: Optional[bool] = False,
+    tasks: Optional[bool] = False,
+    session: AsyncSession = Depends(get_db),
+):
+    user: UserGet = await crud.get_user(
+        db_session=session,
+        user_id=user_id,
+        profile=profile,
+        projects=projects,
+        tasks=tasks,
+    )
     return user
 
 

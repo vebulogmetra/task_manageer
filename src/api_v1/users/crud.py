@@ -58,16 +58,23 @@ async def create_user_profile(
     return profile
 
 
-async def get_users(db_session: AsyncSession) -> list[User]:
-    stmt = (
-        select(User)
-        .options(
-            joinedload(User.profile),
-            selectinload(User.projects),
-            selectinload(User.tasks),
-        )
-        .order_by(User.created_at)
-    )
+async def get_users(  # noqa
+    db_session: AsyncSession, profile: bool, projects: bool, tasks: bool
+) -> list[User]:
+    stmt = select(User)
+    options = []
+
+    if profile:
+        options.append(joinedload(User.profile))
+    if projects:
+        options.append(selectinload(User.projects))
+    if tasks:
+        options.append(selectinload(User.tasks))
+
+    if options:
+        stmt = stmt.options(*options).order_by(User.created_at)
+    else:
+        stmt = stmt.order_by(User.created_at)
     result: Result = await db_session.execute(stmt)
     users: list[User] = result.scalars().all()
     if users is None:
@@ -75,16 +82,24 @@ async def get_users(db_session: AsyncSession) -> list[User]:
     return list(users)
 
 
-async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
-    stmt = (
-        select(User)
-        .options(
-            joinedload(User.profile),
-            selectinload(User.projects),
-            selectinload(User.tasks),
-        )
-        .where(User.id == user_id)
-    )
+async def get_user(  # noqa
+    db_session: AsyncSession, user_id: UUID, profile: bool, projects: bool, tasks: bool
+) -> User:
+    stmt = select(User)
+    options = []
+
+    if profile:
+        options.append(joinedload(User.profile))
+    if projects:
+        options.append(selectinload(User.projects))
+    if tasks:
+        options.append(selectinload(User.tasks))
+
+    if options:
+        stmt = stmt.options(*options).where(User.id == user_id)
+    else:
+        stmt = stmt.where(User.id == user_id)
+
     try:
         user: User = await db_session.scalar(stmt)
     except NoResultFound:

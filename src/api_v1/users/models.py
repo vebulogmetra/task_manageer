@@ -43,13 +43,6 @@ class User(Base):
         secondary=users_tasks, back_populates="users"
     )
 
-    def __str__(self):
-        return f"{self.__class__.__name__} (id={self.id},\
-username={self.username})"
-
-    def __repr__(self):
-        return str(self)
-
 
 class UserProfile(Base, UserRelationMixin):
     _user_id_unique = True

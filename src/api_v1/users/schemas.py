@@ -39,6 +39,9 @@ class UserProfileGet(BaseModel):
 class UserGet(User):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
+    # profile: Optional[dict] = None
+    # projects: Optional[list[dict]] = None
+    # tasks: Optional[list[dict]] = None
     created_at: datetime
 
 
