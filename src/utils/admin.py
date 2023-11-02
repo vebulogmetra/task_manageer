@@ -13,7 +13,7 @@ class AdminApplication:
     def __init__(self, server_app: FastAPI, db_engine: AsyncEngine):
         self._server_app = server_app
         self._db_engine = db_engine
-        self._views_list = (UserAdmin, ProjectAdmin, TaskAdmin)
+        self._views_list = [UserAdmin, ProjectAdmin, TaskAdmin]
 
     def init(self) -> Admin:
         self._admin_app = Admin(self._server_app, self._db_engine)
@@ -25,7 +25,8 @@ class AdminApplication:
         if admin_app:
             self._admin_app = admin_app
         if views:
-            self._views_list = views
+            self._views_list.extend(views)
+            self._views_list = tuple(set(self._views_list))
 
         for view in self._views_list:
             self._admin_app.add_view(view)

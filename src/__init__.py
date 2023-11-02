@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from src.api_v1 import main_router as v1_router
 from src.core.config import settings
+from src.utils.admin import AdminApplication, TaskCommentAdmin
 from src.utils.database import db_manager
 
 
@@ -28,5 +29,11 @@ def init_app(init_db=True) -> FastAPI:
     )
 
     server_app.include_router(router=v1_router, prefix=settings.api_v1_prefix)
+
+    admin_app: AdminApplication = AdminApplication(
+        server_app=server_app, db_engine=db_manager._engine
+    )
+    admin_app.init()
+    admin_app.include_views(views=[TaskCommentAdmin])
 
     return server_app
