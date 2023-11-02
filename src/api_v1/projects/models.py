@@ -35,9 +35,11 @@ class Project(Base):
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
     )
 
-    tasks: sao.Mapped[list[Task]] = sao.relationship(back_populates="project")
+    tasks: sao.Mapped[list[Task]] = sao.relationship(
+        back_populates="project", lazy="selectin"
+    )
     users: sao.Mapped[list[User]] = sao.relationship(
-        secondary=users_projects, back_populates="projects"
+        secondary=users_projects, back_populates="projects", lazy="selectin"
     )
 
     def __str__(self):

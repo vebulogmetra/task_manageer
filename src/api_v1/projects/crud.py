@@ -34,10 +34,25 @@ async def add_user_to_project(db_session: AsyncSession, project_id: UUID, user_i
     await db_session.commit()
 
 
-async def get_projects(db_session: AsyncSession) -> list[Project]:
-    stmt = select(Project).options(joinedload(Project.users)).order_by(Project.created_at)
+async def get_projects(  # noqa
+    db_session: AsyncSession, users: bool, tasks: bool
+) -> list[Project]:
+    stmt = select(Project)
+
+    options = []
+
+    if users:
+        options.append(selectinload(Project.users))
+    if tasks:
+        options.append(selectinload(Project.tasks))
+
+    if options:
+        stmt = stmt.options(*options).order_by(Project.created_at)
+    else:
+        stmt = stmt.order_by(Project.created_at)
+
     result: Result = await db_session.execute(stmt)
-    projects: list[Project] = result.scalars().unique()
+    projects: list[Project] = result.scalars().all()
     if projects is None:
         raise custom_exc.not_found(entity_name=Project.__name__)
     return list(projects)

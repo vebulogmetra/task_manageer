@@ -266,7 +266,8 @@ async def run_create():
             description=f"Add {secrets.token_urlsafe(16)}",
             status="created",  # created, in_work, complete
             priority="high",  # low, medium, high
-            due_date=datetime.now() + timedelta(days=secrets.randbelow(20)),
+            due_date=datetime.now().replace(microsecond=0)
+            + timedelta(days=secrets.randbelow(20)),
         )
         task_john: Task = await creater.create_task(
             creator_id=user_john.id,
@@ -275,7 +276,8 @@ async def run_create():
             description=f"{secrets.token_urlsafe(16)} API",
             status="created",  # created, in_work, complete
             priority="high",  # low, medium, high
-            due_date=datetime.now() + timedelta(days=secrets.randbelow(20)),
+            due_date=datetime.now().replace(microsecond=0)
+            + timedelta(days=secrets.randbelow(20)),
         )
 
         await creater.add_users_to_task(

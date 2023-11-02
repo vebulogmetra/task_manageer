@@ -31,9 +31,13 @@ async def add_user_to_project_handler(
 
 @router.get("/projects", response_model=list[ProjectGet])
 async def get_projects_handler(
+    include_users: bool = False,
+    include_tasks: bool = False,
     session: AsyncSession = Depends(get_db),
 ):
-    return await crud.get_projects(db_session=session)
+    return await crud.get_projects(
+        db_session=session, users=include_users, tasks=include_tasks
+    )
 
 
 @router.get("/project/{project_id}", response_model=ProjectGet)

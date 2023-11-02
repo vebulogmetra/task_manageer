@@ -12,3 +12,25 @@ class WithUser(BaseModel):
     is_active: bool
     is_verified: bool
     created_at: datetime
+
+
+class WithTask(BaseModel):
+    id: UUID
+    title: str
+    description: str
+    status: str
+    priority: str
+    due_date: datetime
+    creator_id: UUID
+    project_id: UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class WithProject(BaseModel):
+    id: UUID
+    name: str
+    description: str
+    creator_id: UUID
+    created_at: datetime
+    updated_at: datetime
