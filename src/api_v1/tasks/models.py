@@ -47,15 +47,11 @@ class Task(Base):
     )
     project: sao.Mapped[Project] = sao.relationship(back_populates="tasks")
     users: sao.Mapped[list[User]] = sao.relationship(
-        secondary=users_tasks, back_populates="tasks"
+        secondary=users_tasks, back_populates="tasks", lazy="selectin"
     )
-
-    def __str__(self):
-        return f"{self.__class__.__name__}(id={self.id}, \
-title={self.title}, user_id={self.creator_id}, project_id={self.project_id})"
-
-    def __repr__(self):
-        return str(self)
+    comments: sao.Mapped[list[TaskComment]] = sao.relationship(
+        back_populates="task", lazy="selectin"
+    )
 
 
 class TaskComment(Base):
@@ -69,3 +65,4 @@ class TaskComment(Base):
     task_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("tasks.id", onupdate="CASCADE", ondelete="CASCADE")
     )
+    task: sao.Mapped[Task] = sao.relationship(back_populates="comments")

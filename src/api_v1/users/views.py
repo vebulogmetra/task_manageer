@@ -47,7 +47,7 @@ async def create_profile_handler(
     return await crud.create_user_profile(db_session=session, profile_data=profile_data)
 
 
-@router.get("/users")
+@router.get("/users", response_model=list[UserGet])
 async def get_users_handler(
     profile: Optional[bool] = False,
     projects: Optional[bool] = False,
@@ -60,7 +60,7 @@ async def get_users_handler(
     return users
 
 
-@router.get("/user/{user_id}")
+@router.get("/user/{user_id}", response_model=UserGet)
 async def get_user_by_id_handler(
     user_id: str,
     profile: Optional[bool] = False,

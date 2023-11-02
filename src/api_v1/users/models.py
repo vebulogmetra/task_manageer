@@ -35,12 +35,14 @@ class User(Base):
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
-    profile: sao.Mapped[UserProfile] = sao.relationship(back_populates="user")
+    profile: sao.Mapped[UserProfile] = sao.relationship(
+        back_populates="user", lazy="joined"
+    )
     projects: sao.Mapped[list[Project]] = sao.relationship(
-        secondary=users_projects, back_populates="users"
+        secondary=users_projects, back_populates="users", lazy="selectin"
     )
     tasks: sao.Mapped[list[Task]] = sao.relationship(
-        secondary=users_tasks, back_populates="users"
+        secondary=users_tasks, back_populates="users", lazy="selectin"
     )
 
 
