@@ -1,6 +1,9 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+
+from src.api_v1.associates.schemas import WithUser
 
 
 class Task(BaseModel):
@@ -19,6 +22,7 @@ class TaskCreate(Task):
 
 class TaskGet(Task):
     id: UUID
+    users: Optional[WithUser]
     created_at: str
     updated_at: str
 

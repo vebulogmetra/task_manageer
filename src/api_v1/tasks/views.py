@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.base.schemas import StatusMsg
@@ -19,6 +19,14 @@ async def create_task_handler(
     return await crud.create_task(db_session=session, task_data=task_data)
 
 
+@router.post("/add_user", response_model=StatusMsg)
+async def add_user_to_task_handler(
+    task_id: str, user_id: str, session: AsyncSession = Depends(get_db)
+):
+    await crud.add_user_to_task(db_session=session, task_id=task_id, user_id=user_id)
+    return StatusMsg(status="ok", detail=f"User {user_id} added in task {task_id}")
+
+
 @router.get("/tasks", response_model=list[TaskGet])
 async def get_tasks_handler(
     session: AsyncSession = Depends(get_db),
@@ -32,10 +40,7 @@ async def get_task_by_id_handler(
     session: AsyncSession = Depends(get_db),
 ):
     task = crud.get_task(db_session=session, task_id=task_id)
-    if task is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found!"
-        )
+    return task
 
 
 @router.put("/update/{task_id}", response_model=TaskGet)

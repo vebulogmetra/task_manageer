@@ -3,9 +3,11 @@ from uuid import UUID
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.api_v1.tasks.models import Task
 from src.api_v1.tasks.schemas import TaskCreate, TaskUpdate
+from src.api_v1.users.models import User
 from src.utils.exceptions import custom_exc
 
 
@@ -15,6 +17,19 @@ async def create_task(db_session: AsyncSession, task_data: TaskCreate) -> Task:
     await db_session.commit()
     await db_session.refresh(task)  # Если на стороне БД генертся данные
     return task
+
+
+async def add_user_to_task(db_session: AsyncSession, task_id: UUID, user_id: UUID):
+    task = await db_session.scalar(
+        select(Task)
+        .where(Task.id == task_id)
+        .options(
+            selectinload(Task.users),
+        ),
+    )
+    user = await db_session.scalar(select(User).where(User.id == user_id))
+    task.users.append(user)
+    await db_session.commit()
 
 
 async def get_tasks(db_session: AsyncSession) -> list[Task]:
