@@ -14,11 +14,11 @@ class TaskComment(BaseModel):
 
 
 class TaskCommentCreate(TaskComment):
-    pass
+    ...
 
 
 class TaskCommentUpdate(TaskComment):
-    pass
+    ...
 
 
 class TaskCommentGet(BaseModel):
@@ -51,4 +51,4 @@ class TaskGet(Task):
 
 
 class TaskUpdate(Task):
-    pass
+    ...

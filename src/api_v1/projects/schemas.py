@@ -14,7 +14,7 @@ class Project(BaseModel):
 
 
 class ProjectCreate(Project):
-    pass
+    ...
 
 
 class ProjectGet(Project):
@@ -27,4 +27,4 @@ class ProjectGet(Project):
 
 
 class ProjectUpdate(Project):
-    pass
+    ...

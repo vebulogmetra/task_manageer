@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING, Optional
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
-from src.api_v1.associates.models import users_projects, users_tasks
+from src.api_v1.associates.models import users_projects, users_tasks, users_teams
 from src.api_v1.base.model_mixins import UserRelationMixin
 from src.api_v1.base.models import Base
 
 if TYPE_CHECKING:
     from src.api_v1.projects.models import Project
     from src.api_v1.tasks.models import Task
+    from src.api_v1.teams.models import Team
 
 
 class User(Base):
@@ -43,6 +44,9 @@ class User(Base):
     )
     tasks: sao.Mapped[list[Task]] = sao.relationship(
         secondary=users_tasks, back_populates="users", lazy="selectin"
+    )
+    teams: sao.Mapped[list[Team]] = sao.relationship(
+        secondary=users_teams, back_populates="users", lazy="selectin"
     )
 
 

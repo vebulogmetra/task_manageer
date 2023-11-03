@@ -35,11 +35,11 @@ class UserProfile(BaseModel):
 
 
 class UserProfileCreate(BaseModel):
-    pass
+    ...
 
 
 class UserProfileGet(BaseModel):
-    pass
+    ...
 
 
 class UserGet(User):
@@ -57,4 +57,4 @@ class SignupGet(BaseModel):
 
 
 class UserUpdate(User):
-    pass
+    ...

@@ -1,293 +1,182 @@
 import asyncio
+import random
 import secrets
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
-from sqlalchemy.engine import Result
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+import names
 
+from quick_tests.creators import AddToEntity, Creator
+from quick_tests.getters import GetEntity, GetEntityWithRelations
 from src.api_v1.projects.models import Project
-from src.api_v1.tasks.models import Task
-from src.api_v1.users.models import User, UserProfile
+from src.api_v1.tasks.models import Task, TaskComment
+from src.api_v1.teams.models import Team
+from src.api_v1.users.models import User
 from src.core.config import settings
-from src.utils.auth import pwd_helper
 from src.utils.database import db_manager
 
 
-class CreateEntity:
-    def __init__(self, db_session: AsyncSession):
-        self.session = db_session
-
-    async def create_user(self, username: str, email: str, password: str) -> User:
-        hashed_password = pwd_helper.get_password_hash(password=password)
-        user: User = User(username=username, email=email, hashed_password=hashed_password)
-        self.session.add(user)
-        await self.session.commit()
-        print(f"Created user: {user.username}")
-        return user
-
-    async def create_user_profile(
-        self, user_id: str, first_name: str, last_name: str
-    ) -> UserProfile:
-        user_profile: UserProfile = UserProfile(
-            user_id=user_id, first_name=first_name, last_name=last_name
+async def create_users(creator: Creator, users_data: list[dict]) -> list[User]:
+    created_users = []
+    for ud in users_data:
+        user = await creator.create_user(
+            username=ud.get("username"), email=ud.get("email"), password="123"
         )
-        self.session.add(user_profile)
-        await self.session.commit()
-        print(f"Created user_profile: {user_profile.id}")
-        return user_profile
+        created_users.append(user)
+    return created_users
 
-    async def create_project(
-        self, name: str, description: str, creator_id: str
-    ) -> Project:
-        project: Project = Project(
-            name=name, description=description, creator_id=creator_id
-        )
-        self.session.add(project)
-        await self.session.commit()
-        print(f"Crated project: {project.name}")
-        return project
 
-    async def add_users_to_project(self, project_id: str, users: list):
-        project = await self.session.scalar(
-            select(Project)
-            .where(Project.id == project_id)
-            .options(
-                selectinload(Project.users),
-            ),
+async def create_profiles(creator: Creator, users: list[User]):
+    for u in users:
+        if u.username == "none":
+            continue
+        await creator.create_user_profile(
+            user_id=u.id, first_name=u.username, last_name=names.get_last_name()
         )
 
-        project.users.extend(users)
-        await self.session.commit()
 
-    async def add_users_to_task(self, task_id: str, users: list):
-        task = await self.session.scalar(
-            select(Task)
-            .where(Task.id == task_id)
-            .options(
-                selectinload(Task.users),
-            ),
+async def create_projects(creator: Creator, users: list[User]) -> list[Project]:
+    created_projects = []
+    for u in users:
+        project = await creator.create_project(
+            name=secrets.token_hex(8),
+            description=secrets.token_hex(16),
+            creator_id=u.id,
         )
+        created_projects.append(project)
+    return created_projects
 
-        task.users.extend(users)
-        await self.session.commit()
 
-    async def create_task(
-        self,
-        project_id: str,
-        title: str,
-        description: str,
-        status: str,
-        priority: str,
-        due_date: datetime,
-        creator_id: str,
-    ) -> Task:
-        task: Task = Task(
-            project_id=project_id,
-            title=title,
-            description=description,
-            status=status,
-            priority=priority,
-            due_date=due_date,
-            creator_id=creator_id,
+async def create_tasks(creator: Creator, projects: list[Project]) -> list[Task]:
+    created_tasks = []
+    for p in projects:
+        task = await creator.create_task(
+            creator_id=p.creator_id,
+            project_id=p.id,
+            title=secrets.token_hex(8),
+            description=f"Add {secrets.token_urlsafe(32)}",
+            status="created",  # created, in_work, complete
+            priority="high",  # low, medium, high
+            due_date=datetime.now().replace(microsecond=0)
+            + timedelta(days=secrets.randbelow(20)),
         )
-        self.session.add(task)
-        await self.session.commit()
-        print(f"Created task: {task.title}")
-        return task
+        created_tasks.append(task)
+    return created_tasks
 
 
-class GetEntity:
-    def __init__(self, db_session: AsyncSession):
-        self.session = db_session
-
-    async def get_user_by_username(self, username: str) -> User | None:
-        stmt = select(User).where(User.username == username)
-        user: User | None = await self.session.scalar(stmt)
-        if user is None:
-            return user
-        print(f"Get user by username: id={user.id}, username={user.username}")
-        return user
-
-    async def get_user_profile_by_user_id(self, user_id: str) -> UserProfile | None:
-        stmt = select(UserProfile).where(UserProfile.user_id == user_id)
-        result: Result = await self.session.execute(stmt)
-        user_profile: UserProfile | None = result.scalar_one_or_none()
-        print(f"Get user_profile by user_id: profile={user_profile}")
-        return user_profile
-
-    async def get_project_by_name(self, name: str) -> Project | None:
-        stmt = select(Project).where(Project.name == name)
-        result: Result = await self.session.execute(stmt)
-        project: Project = result.scalar_one_or_none()
-        print(f"Get project by name: id={project.id}, name={project.name}")
-        return project
-
-    async def get_task_by_title(self, title: str) -> Project | None:
-        stmt = select(Task).where(Task.title == title)
-        result: Result = await self.session.execute(stmt)
-        task: Task = result.scalar_one_or_none()
-        print(f"Get task by title: id={task.id}, title={task.title}")
-        return task
-
-
-class GetEntityWithRelations:
-    def __init__(self, db_session: AsyncSession):
-        self.session = db_session
-
-    async def get_users_with_tasks(self) -> list[User]:
-        stmt = select(User).options(selectinload(User.tasks)).order_by(User.id)
-        result: Result = await self.session.execute(stmt)
-        users: list[User] = result.scalars()
-        for user in users:  # type: User
-            print(f"User: {user.username}")
-            for ut in user.tasks:
-                print("-- ", f"Owner of task: {ut.title}")
-        return users
-
-    async def get_tasks_with_users(self) -> list[Task]:
-        stmt = select(Task).options(selectinload(Task.users)).order_by(Task.id)
-        result: Result = await self.session.execute(stmt)
-        tasks: list[Task] = result.scalars()
-        for task in tasks:
-            print(f"Task: {task.title}; Task Users:")
-            for user in task.users:
-                print(f"-- User: {user.username}")
-        return tasks
-
-    async def get_projects_with_users(self) -> list[Project]:
-        stmt = select(Project).options(selectinload(Project.users)).order_by(Project.id)
-        result: Result = await self.session.execute(stmt)
-        projects: list[Project] = result.scalars()
-        for p in projects:
-            print(f"Project: {p.name}; Project Users:")
-            for user in p.users:
-                print(f"-- User: {user.username}")
-        return projects
-
-    async def get_users_with_profiles(self) -> list[User]:
-        stmt = select(User).options(joinedload(User.profile)).order_by(User.id)
-        # stmt = select(User).options(selectinload(User.profile)).order_by(User.id)
-        users: list[User] = await self.session.scalars(stmt)
-        for user in users:
-            print(f"User: {user.username}")
-            print(
-                f"User profile first name: {user.profile.first_name if user.profile else None}"  # noqa
-            )
-        return users
-
-    async def get_users_with_projects_and_with_tasks(self) -> list[User]:
-        stmt = (
-            select(User)
-            .options(selectinload(User.projects), selectinload(User.tasks))
-            .order_by(User.id)
+async def create_task_comments(
+    creator: Creator, users: list[User], tasks: list[TaskComment]
+):
+    user_ids = [u.id for u in users]
+    comments = []
+    for idx, t in enumerate(tasks):
+        comment1 = await creator.create_task_comment(
+            user_id=user_ids[idx], task_id=t.id, content=secrets.token_hex(16)
         )
-        result: Result = await self.session.execute(stmt)
-        users: list[User] = result.scalars()
-        for user in users:
-            print(f"User: {user.username}")
-            for p in user.projects:
-                print(f"-- In project: {p.name}")  # noqa
-            for t in user.tasks:
-                print("-- ", f"In task: {t.title}")
-        return users
+        comment2 = await creator.create_task_comment(
+            user_id=user_ids[idx], task_id=t.id, content=secrets.token_hex(16)
+        )
+        comments.append(comment1)
+        comments.append(comment2)
+    return comments
 
 
-async def run_without_create():
+async def create_teams(creator: Creator, users: list[User], count: int = 3) -> list[Team]:
+    user_ids = [u.id for u in users]
+    created_teams = []
+    for i in range(count):
+        team = await creator.create_team(
+            creator_id=user_ids[i], title=secrets.token_hex(8)
+        )
+        created_teams.append(team)
+    return created_teams
+
+
+async def add_users_to_project_(
+    executor: AddToEntity, users: list[User], projects: list[Project]
+):
+    for idx, p in enumerate(projects):
+        await executor.add_users_to_project(project_id=p.id, users=[users[idx]])
+
+
+async def add_users_to_task_(executor: AddToEntity, users: list[User], tasks: list[Task]):
+    for idx, t in enumerate(tasks):
+        await executor.add_users_to_task(task_id=t.id, users=[users[idx]])
+
+
+async def add_users_to_team_(executor: AddToEntity, users: list[User], teams: list[Team]):
+    for idx, te in enumerate(teams):
+        await executor.add_users_to_team(team_id=te.id, users=[users[idx]])
+
+
+def _generate_user_data(count: int = 10) -> list[dict]:
+    users_data = []
+    for _ in range(count - 1):
+        uname = f"{names.get_first_name()}_{random.randint(10,20)}"
+        ud = {"username": uname, "email": f"{uname}@gmail.com"}
+        users_data.append(ud)
+    return users_data
+
+
+async def create_all():
     db_manager.init(connection_url=settings.db_alchemy_url, echo=settings.debug_database)
     async with db_manager.scoped_session_dependency() as session:
-        getter: GetEntity = GetEntity(session)
+        creator: Creator = Creator(session)
+        users_data = _generate_user_data(count=10)
+        users_data.append({"username": "none", "email": "none@gmail.com"})
+        users: list[User] = await create_users(creator=creator, users_data=users_data)
+        await create_profiles(creator=creator, users=users)
+        projects: list[Project] = await create_projects(creator=creator, users=users)
+        tasks: list[Task] = await create_tasks(creator=creator, projects=projects)
+        task_comments: list[TaskComment] = await create_task_comments(
+            creator=creator, users=users, tasks=tasks
+        )
+        teams: list[Team] = await create_teams(creator=creator, users=users, count=5)
+
+        add_executor: AddToEntity = AddToEntity(session)
+
+        await add_users_to_project_(executor=add_executor, users=users, projects=projects)
+        await add_users_to_task_(executor=add_executor, users=users, tasks=tasks)
+        await add_users_to_team_(executor=add_executor, users=users, teams=teams)
+        print("*" * 30)
+        print("*" * 30)
+        print(users)
+        print("*" * 30)
+        print(projects)
+        print("*" * 30)
+        print(tasks)
+        print("*" * 30)
+        print(task_comments)
+        print("*" * 30)
+        print(teams)
+        print("*" * 30)
+        print("*" * 30)
+
+
+async def get_all():
+    db_manager.init(connection_url=settings.db_alchemy_url, echo=settings.debug_database)
+    async with db_manager.scoped_session_dependency() as session:
         getter_with: GetEntityWithRelations = GetEntityWithRelations(session)
-        await getter.get_user_by_username(username="string")  # Not exists
-        await getter.get_user_by_username(username="ivan")
-        await getter.get_user_by_username(username="viktor")
-        await getter.get_user_by_username(username="john")
-        await getter.get_project_by_name(name="IvanProject")
-        await getter.get_task_by_title(title="Task for John")
 
-        _: list[User] = await getter_with.get_users_with_profiles()
-        _: list[User] = await getter_with.get_users_with_tasks()
-        print("#" * 30)
-        _: list[Task] = await getter_with.get_tasks_with_users()
-        print("#" * 30)
-        print("@" * 30)
-        _: list[Project] = await getter_with.get_projects_with_users()
-        print("@" * 30)
-        print("!" * 30)
-        _: list[User] = await getter_with.get_users_with_projects_and_with_tasks()
-        print("!" * 30)
+        await getter_with.get_users_with_profiles()
+        users: list[User] = await getter_with.get_users_with_all()
+        projects: list[Project] = await getter_with.get_projects_with_all()
+        tasks: list[Task] = await getter_with.get_tasks_with_all()
+        teams: list[Team] = await getter_with.get_teams_with_all()
 
+        user_ids = [u.id for u in users]
+        project_ids = [p.id for p in projects]
+        task_ids = [t.id for t in tasks]
+        team_ids = [te.id for te in teams]
 
-async def run_create():
-    db_manager.init(connection_url=settings.db_alchemy_url, echo=settings.debug_database)
-    async with db_manager.scoped_session_dependency() as session:
-        creater: CreateEntity = CreateEntity(session)
-        user_ivan: User = await creater.create_user(
-            username="ivan", email="ivan@gmail.com", password="123"
-        )
-        user_viktor: User = await creater.create_user(
-            username="viktor", email="viktor@gmail.com", password="123"
-        )
-        user_john: User = await creater.create_user(
-            username="john", email="john@gmail.com", password="123"
-        )
-        _: User = await creater.create_user(
-            username="vasya", email="vasya@gmail.com", password="321"
-        )
-        await creater.create_user_profile(
-            user_id=user_ivan.id, first_name="Ivan", last_name="Jobs"
-        )
-        await creater.create_user_profile(
-            user_id=user_john.id, first_name="John", last_name="Doe"
-        )
-        project_ivan: Project = await creater.create_project(
-            name="IvanProject",
-            description="lalala some description string lalala",
-            creator_id=user_ivan.id,
-        )
-        project_viktor: Project = await creater.create_project(
-            name=f"ViktorProject {secrets.token_urlsafe(16)}",
-            description="tatata string tatata",
-            creator_id=user_viktor.id,
-        )
-
-        await creater.add_users_to_project(
-            project_id=project_ivan.id, users=[user_john, user_viktor]
-        )
-        await creater.add_users_to_project(
-            project_id=project_viktor.id, users=[user_john, user_ivan]
-        )
-
-        task_ivan: Task = await creater.create_task(
-            creator_id=user_ivan.id,
-            project_id=project_ivan.id,
-            title="Task for John",
-            description=f"Add {secrets.token_urlsafe(16)}",
-            status="created",  # created, in_work, complete
-            priority="high",  # low, medium, high
-            due_date=datetime.now().replace(microsecond=0)
-            + timedelta(days=secrets.randbelow(20)),
-        )
-        task_john: Task = await creater.create_task(
-            creator_id=user_john.id,
-            project_id=project_viktor.id,
-            title=f"Task {secrets.token_urlsafe(16)}",
-            description=f"{secrets.token_urlsafe(16)} API",
-            status="created",  # created, in_work, complete
-            priority="high",  # low, medium, high
-            due_date=datetime.now().replace(microsecond=0)
-            + timedelta(days=secrets.randbelow(20)),
-        )
-
-        await creater.add_users_to_task(
-            task_id=task_ivan.id, users=[user_viktor, user_john]
-        )
-        await creater.add_users_to_task(
-            task_id=task_john.id, users=[user_john, user_ivan]
-        )
+        # getter: GetEntity = GetEntity(session)
+        # await getter.get_user_by_id(user_id=random.choice(user_ids))
+        # await getter.get_project_by_id(project_id=random.choice(project_ids))
+        # await getter.get_task_by_id(task_id=random.choice(task_ids))
+        # await getter.get_team_by_id(team_id=random.choice(team_ids))
+        # await getter.get_task_comment_by_task_id(task_id=random.choice(task_ids))
+        # await getter.get_user_profile_by_user_id(user_id=random.choice(user_ids))
 
 
 if __name__ == "__main__":
-    # asyncio.run(run_create())
-    asyncio.run(run_without_create())
+    # asyncio.run(create_all())
+    asyncio.run(get_all())
