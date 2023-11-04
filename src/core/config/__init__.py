@@ -21,6 +21,11 @@ class Config(BaseSettings):
 
     development: bool
     debug_database: bool
+    show_admin_panel: bool
+    admin_panel_login: bool
+    admin_auth_secret: str
+    admin_username: str
+    admin_password: str
 
     app_host: str
     app_port: int
