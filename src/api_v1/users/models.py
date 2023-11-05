@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from typing import TYPE_CHECKING, Optional
+from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
@@ -49,6 +50,9 @@ class User(Base):
         secondary=users_teams, back_populates="users", lazy="selectin"
     )
 
+    def __repr__(self):
+        return f"User {self.username}"
+
 
 class UserProfile(Base, UserRelationMixin):
     _user_id_unique = True
@@ -56,3 +60,18 @@ class UserProfile(Base, UserRelationMixin):
 
     first_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
     last_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
+
+    profile_image: sao.Mapped[ProfileImage] = sao.relationship(
+        back_populates="owner", lazy="joinedload"
+    )
+
+    def __repr__(self):
+        return f"Profile {self.first_name}"
+
+
+class ProfileImage(Base):
+    name: sao.Mapped[str] = sao.mapped_column(sa.String(128))
+    img: sao.Mapped[str] = sao.mapped_column(sa.String(128))
+    minetype: sao.Mapped[str] = sao.mapped_column(sa.String(128))
+    profile_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("userprofiles.id"))
+    owner: sao.Mapped[UserProfile] = sao.relationship(back_populates="profile_image")
