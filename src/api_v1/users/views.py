@@ -1,11 +1,16 @@
+import shutil
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
+from werkzeug.utils import secure_filename
 
+from src.api_v1.auth.schemas import TokenUserData
+from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.users import crud
+from src.api_v1.users.models import ProfileImage
 from src.api_v1.users.schemas import (
     SignupGet,
     UserCreate,
@@ -47,34 +52,56 @@ async def create_profile_handler(
     return await crud.create_user_profile(db_session=session, profile_data=profile_data)
 
 
+@router.post("/upload", summary="Upload Profile picture")
+async def upload_profile_image(
+    profile_id: str, session: AsyncSession = Depends(get_db), file: UploadFile = File(...)
+):
+    with open(f"src/front/static/profileimages/{file.filename}", "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    name = secure_filename(file.filename)
+    mimetype = file.content_type
+
+    image_upload = ProfileImage(
+        img=f"src/front/static/profileimages/{file.filename}",
+        minetype=mimetype,
+        name=name,
+        profile_id=profile_id,
+    )
+    session.add(image_upload)
+    await session.commit()
+    return f"{name} has been Successfully Uploaded"
+
+
 @router.get("/users", response_model=list[UserGet])
 async def get_users_handler(
-    profile: Optional[bool] = False,
-    projects: Optional[bool] = False,
-    tasks: Optional[bool] = False,
     session: AsyncSession = Depends(get_db),
+    user_data: TokenUserData = Depends(get_current_user),
 ):
-    users = await crud.get_users(
-        db_session=session, profile=profile, projects=projects, tasks=tasks
-    )
+    users = await crud.get_users(db_session=session)
     return users
 
 
-@router.get("/user/{user_id}", response_model=UserGet)
-async def get_user_by_id_handler(
-    user_id: str,
-    profile: Optional[bool] = False,
-    projects: Optional[bool] = False,
-    tasks: Optional[bool] = False,
+@router.get("/get_profile/{profile_id}", response_model=UserProfileGet)
+async def get_profile_by_id_handler(
+    profile_id: str,
     session: AsyncSession = Depends(get_db),
 ):
-    user: UserGet = await crud.get_user(
-        db_session=session,
-        user_id=user_id,
-        profile=profile,
-        projects=projects,
-        tasks=tasks,
+    profile: UserProfileGet = await crud.get_user_profile(
+        db_session=session, profile_id=profile_id
     )
+    return profile
+
+
+@router.get("/user", response_model=UserGet)
+async def get_user_by_id_handler(
+    user_id: Optional[str] = None,
+    session: AsyncSession = Depends(get_db),
+    user_data: TokenUserData = Depends(get_current_user),
+):
+    if user_id is None:
+        user_id = user_data.id
+    user: UserGet = await crud.get_user(db_session=session, user_id=user_id)
     return user
 
 
