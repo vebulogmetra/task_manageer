@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script>
+    const searchForOperation = () => {
+        const searchInputValue = document.getElementById("user_search").value;
+        window.location.href = `/front/pages/search_by_id/${searchInputValue}`;
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="flex justify-center flex-col items-center">
+    <div class="flex my-3 gap-5">
+        <input id="user_search" type="text" placeholder="user_id" class="text-xl">
+        <button onclick="searchForOperation()" class="border-2 rounded-3xl bg-gray-300 p-3">Search by id</button>
+    </div>
+    <span>Например, tyui-uiop-hjkl</span>
+    {% for user in users %}
+        <div class="flex rounded-3 border-2 p-3 mt-5">
+            <div class="flex flex-col">
+                <span class="text-2xl font-bold">user_id: {{ user.id }}</span>
+                <span class="text-lg">username: {{ user.username }}</span>
+                <span class="text-lg">email: {{ user.email }}</span>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
