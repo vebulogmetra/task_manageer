@@ -16,5 +16,12 @@ class CustomHTTPException:
             detail=f"{detail}",
         )
 
+    @staticmethod
+    def internal_error(detail: str) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"{detail}",
+        )
+
 
 custom_exc: CustomHTTPException = CustomHTTPException()

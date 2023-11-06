@@ -58,23 +58,16 @@ async def create_user_profile(
     return profile
 
 
-async def get_users(  # noqa
-    db_session: AsyncSession, profile: bool, projects: bool, tasks: bool
-) -> list[User]:
+async def get_users(db_session: AsyncSession) -> list[User]:
     stmt = select(User)
-    options = []
+    options = [
+        joinedload(User.profile),
+        selectinload(User.projects),
+        selectinload(User.tasks),
+    ]
 
-    if profile:
-        options.append(joinedload(User.profile))
-    if projects:
-        options.append(selectinload(User.projects))
-    if tasks:
-        options.append(selectinload(User.tasks))
+    stmt = stmt.options(*options).order_by(User.created_at)
 
-    if options:
-        stmt = stmt.options(*options).order_by(User.created_at)
-    else:
-        stmt = stmt.order_by(User.created_at)
     result: Result = await db_session.execute(stmt)
     users: list[User] = result.scalars().all()
     if users is None:
@@ -82,29 +75,37 @@ async def get_users(  # noqa
     return list(users)
 
 
-async def get_user(  # noqa
-    db_session: AsyncSession, user_id: UUID, profile: bool, projects: bool, tasks: bool
-) -> User:
+async def get_user(db_session: AsyncSession, user_id: UUID) -> User:
     stmt = select(User)
-    options = []
+    options = [
+        joinedload(User.profile),
+        selectinload(User.projects),
+        selectinload(User.tasks),
+    ]
 
-    if profile:
-        options.append(joinedload(User.profile))
-    if projects:
-        options.append(selectinload(User.projects))
-    if tasks:
-        options.append(selectinload(User.tasks))
-
-    if options:
-        stmt = stmt.options(*options).where(User.id == user_id)
-    else:
-        stmt = stmt.where(User.id == user_id)
+    stmt = stmt.options(*options).where(User.id == user_id)
 
     try:
         user: User = await db_session.scalar(stmt)
     except NoResultFound:
         raise custom_exc.not_found(entity_name=User.__name__)
     return user
+
+
+async def get_user_profile(db_session: AsyncSession, profile_id: UUID) -> UserProfile:
+    stmt = select(UserProfile)
+    options = [
+        joinedload(UserProfile.profile_image),
+    ]
+
+    stmt = stmt.options(*options).where(UserProfile.id == profile_id)
+
+    try:
+        profile: UserProfile = await db_session.scalar(stmt)
+        print(f"profile: {profile}")
+    except NoResultFound:
+        raise custom_exc.not_found(entity_name=UserProfile.__name__)
+    return profile
 
 
 async def get_user_by_email(db_session: AsyncSession, email: str) -> User:

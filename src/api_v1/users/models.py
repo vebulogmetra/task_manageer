@@ -62,11 +62,11 @@ class UserProfile(Base, UserRelationMixin):
     last_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
 
     profile_image: sao.Mapped[ProfileImage] = sao.relationship(
-        back_populates="owner", lazy="joinedload"
+        back_populates="owner", lazy="joined"
     )
 
     def __repr__(self):
-        return f"Profile {self.first_name}"
+        return f"Profile {self.profile_image}"
 
 
 class ProfileImage(Base):

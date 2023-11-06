@@ -1,14 +1,14 @@
-from typing import NamedTuple
+from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class JWTToken(BaseModel):
-    access: str
-    refresh: str
-    type: str = "bearer"
+    access_token: str
+    refresh_token: str | None
+    token_type: str = "bearer"
 
 
-class TokensPair(NamedTuple):
-    access: str
-    refresh: str
+class TokenUserData(BaseModel):
+    id: UUID
+    email: EmailStr

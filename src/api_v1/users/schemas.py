@@ -29,16 +29,25 @@ class UserCreate(User):
     is_verified: Optional[bool] = False
 
 
+class ProfileImage(BaseModel):
+    name: str
+    img: str
+    minetype: str
+    profile_id: UUID
+
+
 class UserProfile(BaseModel):
+    id: UUID
     first_name: str
     last_name: str
+    profile_image: Optional[ProfileImage] = None
 
 
-class UserProfileCreate(BaseModel):
+class UserProfileCreate(UserProfile):
     ...
 
 
-class UserProfileGet(BaseModel):
+class UserProfileGet(UserProfile):
     ...
 
 
