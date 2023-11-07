@@ -4,7 +4,7 @@
 <script>
     const searchForOperation = () => {
         const searchInputValue = document.getElementById("user_search").value;
-        window.location.href = `/front/pages/search_by_id/${searchInputValue}`;
+        window.location.href = `/front/pages/user/${searchInputValue}`;
     }
 </script>
 {% endblock %}
@@ -12,10 +12,10 @@
 {% block content %}
 <div class="flex justify-center flex-col items-center">
     <div class="flex my-3 gap-5">
-        <input id="user_search" type="text" placeholder="user_id" class="text-xl">
+        <input id="user_search" type="text" placeholder="user_id" class="text-base">
         <button onclick="searchForOperation()" class="border-2 rounded-3xl bg-gray-300 p-3">Search by id</button>
     </div>
-    <span>Например, tyui-uiop-hjkl</span>
+    <span class="text-sm">Например, c2f2672b-e294-46c4-bce6-21ea7d053ed2</span>
     {% for user in users %}
         <div class="flex rounded-3 border-2 p-3 mt-5">
             <div class="flex flex-col">
