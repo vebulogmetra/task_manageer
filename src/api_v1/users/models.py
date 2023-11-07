@@ -6,7 +6,6 @@ from typing import Optional
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
-from src.api_v1.base.model_mixins import UserRelationMixin
 from src.api_v1.base.models import Base
 
 
@@ -35,10 +34,7 @@ class User(Base):
         return f"User {self.username}"
 
 
-class UserProfile(Base, UserRelationMixin):
-    _user_id_unique = True
-    _user_back_populates = "profile"
-
+class UserProfile(Base):
     first_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
     last_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
     avatar_url: sao.Mapped[str | None] = sao.mapped_column(sa.String(256))
