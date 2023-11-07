@@ -1,23 +1,15 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
 from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
-from src.api_v1.associates.models import users_tasks
 from src.api_v1.base.models import Base
-
-if TYPE_CHECKING:
-    from src.api_v1.projects.models import Project
-    from src.api_v1.users.models import User
 
 
 class Task(Base):
-    _user_back_populates = "tasks"
-
     title: sao.Mapped[str] = sao.mapped_column(
         sa.String(128),
         # default=f"New task {uuid4().hex[:5]}",
@@ -34,23 +26,15 @@ class Task(Base):
     creator_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
     )
+    project_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("projects.id", onupdate="CASCADE", ondelete="CASCADE")
+    )
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
     updated_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)"),
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
-    )
-
-    project_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("projects.id", onupdate="CASCADE", ondelete="CASCADE")
-    )
-    project: sao.Mapped[Project] = sao.relationship(back_populates="tasks")
-    users: sao.Mapped[list[User]] = sao.relationship(
-        secondary=users_tasks, back_populates="tasks", lazy="selectin"
-    )
-    comments: sao.Mapped[list[TaskComment]] = sao.relationship(
-        back_populates="task", lazy="selectin"
     )
 
 
@@ -65,4 +49,3 @@ class TaskComment(Base):
     task_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("tasks.id", onupdate="CASCADE", ondelete="CASCADE")
     )
-    task: sao.Mapped[Task] = sao.relationship(back_populates="comments")

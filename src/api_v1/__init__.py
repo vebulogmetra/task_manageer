@@ -13,7 +13,7 @@ from src.api_v1.projects.views import router as projects_router
 from src.api_v1.tasks.models import Task, TaskComment
 from src.api_v1.tasks.views import router as tasks_router
 from src.api_v1.teams.models import Team
-from src.api_v1.users.models import ProfileImage, User, UserProfile
+from src.api_v1.users.models import User, UserProfile
 from src.api_v1.users.views import router as users_router
 
 __all__ = (
@@ -24,7 +24,6 @@ __all__ = (
     "Team",
     "User",
     "UserProfile",
-    "ProfileImage",
     "users_projects",
     "users_tasks",
     "teams_projects",

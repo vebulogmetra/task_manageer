@@ -4,8 +4,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import TokenUserData
+from src.api_v1.users.models import User
 from src.api_v1.users.schemas import UserGet
-from src.api_v1.users.views import get_user_by_id_handler, get_users_handler
+from src.api_v1.users.views import get_user_handler, get_users_handler
 from src.front.pages.auth.service import get_current_user_from_cookie
 from src.utils.database import get_db
 from src.utils.exceptions import EmptyAuthCookie
@@ -37,9 +38,13 @@ async def user_page(
     except EmptyAuthCookie:
         current_user = None
     if current_user:
-        user: UserGet = await get_user_by_id_handler(
-            user_id=user_id, session=session, user_data=current_user
+        user: User = await get_user_handler(
+            by_field="id", by_value=user_id, session=session, user_data=current_user
         )
+    # print(f"USER TEMAS: {user.teams}")
+    # user: UserGet = UserGet.model_validate(user)
+    # user.role = user.role.value
+    # print(f"USER: {user}")
     context = {
         "user": user,
         "request": request,

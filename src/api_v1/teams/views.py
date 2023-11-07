@@ -30,17 +30,13 @@ async def get_teams_handler(
 
 
 @router.get("/team/{team_id}", response_model=TeamGet)
-async def get_team_by_id_handler(
-    team_id: str,
-    profile: Optional[bool] = False,
-    projects: Optional[bool] = False,
-    tasks: Optional[bool] = False,
+async def get_team_handler(
+    by_value: Optional[str] = None,
+    by_field: Optional[str] = None,
     session: AsyncSession = Depends(get_db),
 ):
     team: TeamGet = await crud.get_team(
-        db_session=session,
-        team_id=team_id,
-        projects=projects,
+        db_session=session, by_field=by_field, by_value=by_value
     )
     return team
 

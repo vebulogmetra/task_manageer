@@ -34,3 +34,10 @@ class WithProject(BaseModel):
     creator_id: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class WithTeam(BaseModel):
+    id: UUID
+    title: str
+    creator_id: UUID
+    created_at: datetime

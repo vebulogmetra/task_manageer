@@ -45,20 +45,8 @@ async def get_teams(db_session: AsyncSession, projects: bool) -> list[Team]:  # 
     return list(teams)
 
 
-async def get_team(  # noqa
-    db_session: AsyncSession, team_id: UUID, projects: bool
-) -> Team:
-    stmt = select(Team)
-    options = []
-
-    if projects:
-        options.append(selectinload(Team.projects))
-
-    if options:
-        stmt = stmt.options(*options).where(Team.id == team_id)
-    else:
-        stmt = stmt.where(Team.id == team_id)
-
+async def get_team(db_session: AsyncSession, by_field: str, by_value: str) -> Team:
+    stmt = select(Team).where(getattr(Team, by_field) == by_value)
     try:
         team: Team = await db_session.scalar(stmt)
     except NoResultFound:

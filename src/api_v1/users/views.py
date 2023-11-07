@@ -1,3 +1,4 @@
+import secrets
 import shutil
 from typing import Optional
 from uuid import UUID
@@ -10,7 +11,6 @@ from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.users import crud
-from src.api_v1.users.models import ProfileImage
 from src.api_v1.users.schemas import (
     SignupGet,
     UserCreate,
@@ -54,23 +54,24 @@ async def create_profile_handler(
 
 @router.post("/upload", summary="Upload Profile picture")
 async def upload_profile_image(
-    profile_id: str, session: AsyncSession = Depends(get_db), file: UploadFile = File(...)
+    user_id: str,
+    picture: UploadFile = File(...),
+    session: AsyncSession = Depends(get_db),
 ):
-    with open(f"src/front/static/profileimages/{file.filename}", "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    mimetype = picture.content_type
+    print(f"MIMETYPE: {mimetype}")
+    secure_name = secure_filename(picture.filename)
+    randon_hash = secrets.token_urlsafe(8)
+    picture_filename = f"{secure_name}_{randon_hash}"
 
-    name = secure_filename(file.filename)
-    mimetype = file.content_type
+    with open(f"src/front/static/profileimages/{picture_filename}", "wb") as buffer:
+        shutil.copyfileobj(picture.file, buffer)
 
-    image_upload = ProfileImage(
-        img=f"src/front/static/profileimages/{file.filename}",
-        minetype=mimetype,
-        name=name,
-        profile_id=profile_id,
+    await crud.update_user_profile(
+        db_session=session, user_id=user_id, update_data={"avatar_url": picture_filename}
     )
-    session.add(image_upload)
-    await session.commit()
-    return f"{name} has been Successfully Uploaded"
+
+    return f"{secure_name} has been Successfully Uploaded"
 
 
 @router.get("/users", response_model=list[UserGet])
@@ -94,14 +95,18 @@ async def get_profile_by_id_handler(
 
 
 @router.get("/user", response_model=UserGet)
-async def get_user_by_id_handler(
-    user_id: Optional[str] = None,
+async def get_user_handler(
+    by_value: Optional[str] = None,
+    by_field: Optional[str] = None,
     session: AsyncSession = Depends(get_db),
     user_data: TokenUserData = Depends(get_current_user),
 ):
-    if user_id is None:
-        user_id = user_data.id
-    user: UserGet = await crud.get_user(db_session=session, user_id=user_id)
+    if by_value is None or by_field is None:
+        by_field = "id"
+        by_value = user_data.id
+    user: UserGet = await crud.get_user(
+        db_session=session, by_field=by_field, by_value=by_value
+    )
     return user
 
 

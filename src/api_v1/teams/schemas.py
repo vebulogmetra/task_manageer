@@ -2,14 +2,14 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict
 
 from src.api_v1.associates.schemas import WithProject
 
 
 class Team(BaseModel):
     title: str
-    creator_id: EmailStr
+    creator_id: UUID
 
 
 class TeamCreate(Team):

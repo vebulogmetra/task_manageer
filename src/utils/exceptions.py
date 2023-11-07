@@ -28,6 +28,13 @@ class CustomHTTPException:
         )
 
     @staticmethod
+    def invalid_input(detail: str) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"{detail}",
+        )
+
+    @staticmethod
     def empty_auth_cookie():
         return EmptyAuthCookie("Emty auth cookie")
 

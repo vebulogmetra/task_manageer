@@ -5,24 +5,37 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     {% block head %}{% endblock %}
     <title>Task Manageer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
-    <nav class="flex justify-between text-lg my-3">
-        <ul class="flex ml-10">
-            <li>TaskManageeer</li>
-        </ul>
-        <ul class="flex gap-5 mr-10">
-            <a href="/front/pages/search"><li>Search Users</li></a>
-            <a href="/front/pages/current_user"><li>Account</li></a>
-            <a href="/front/pages/logout"><li>Logout</li></a>
-        </ul>
+<body style="background-color:rgb(44, 44, 44); color: rgb(179, 178, 178);">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Task Manageer</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/front/pages/home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/front/pages/current_user">Account</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/front/pages/team">Team</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/front/pages/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/front/pages/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
     </nav>
-    <hr>
-    <div id="content">
+    <div class="container">
         {% block content %}{% endblock %}
     </div>
 </body>

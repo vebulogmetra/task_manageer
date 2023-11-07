@@ -40,7 +40,13 @@ class AdminApplication:
     def __init__(self, server_app: FastAPI, db_engine: AsyncEngine):
         self._server_app = server_app
         self._db_engine = db_engine
-        self._views_list = [UserAdmin, ProjectAdmin, TaskAdmin]
+        self._views_list = [
+            UserAdmin,
+            ProjectAdmin,
+            TaskAdmin,
+            TaskCommentAdmin,
+            TeamAdmin,
+        ]
 
     def init(self) -> Admin:
         options = {"app": self._server_app, "engine": self._db_engine}
