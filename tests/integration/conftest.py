@@ -8,9 +8,12 @@ from pytest_postgresql.janitor import DatabaseJanitor
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src import init_app
+from src.api_v1.auth.schemas import TokenUserData
+from src.api_v1.auth.service import create_tokens
 from src.api_v1.base.models import Base
 from src.core.config import settings
 from src.utils.database import db_manager, get_db
+from tests.integration.resources import test_user
 
 
 async def db_create_all(connection: AsyncConnection):
@@ -69,7 +72,7 @@ async def connection_test(test_db, event_loop):
         await db_manager.close_connection()
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 async def create_tables(connection_test):
     async with db_manager.get_connection() as connection:
         await db_drop_all(connection)
@@ -83,3 +86,20 @@ async def session_override(app, connection_test):
             yield session
 
     app.dependency_overrides[get_db] = get_db_override
+
+
+def get_user_token(user_id: str, user_email: str):
+    access_token = create_tokens(
+        user_data=TokenUserData(id=user_id, email=user_email)
+    ).access_token
+    return access_token
+
+
+@pytest.fixture
+def access_token(client):
+    login_headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    login_data = {"username": test_user.email, "password": test_user.password}
+
+    response = client.post("/api/v1/auth/login", headers=login_headers, data=login_data)
+    access_token = response.json()["access_token"]
+    return access_token
