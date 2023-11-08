@@ -77,19 +77,23 @@ async def upload_profile_image(
 @router.get("/users", response_model=list[UserGet])
 async def get_users_handler(
     session: AsyncSession = Depends(get_db),
-    user_data: TokenUserData = Depends(get_current_user),
+    _: TokenUserData = Depends(get_current_user),
 ):
     users = await crud.get_users(db_session=session)
     return users
 
 
-@router.get("/get_profile/{profile_id}", response_model=UserProfileGet)
+@router.get("/get_profile", response_model=UserProfileGet)
 async def get_profile_by_id_handler(
-    profile_id: str,
+    user_id: Optional[str] = None,
+    profile_id: Optional[str] = None,
     session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
+    if user_id is None and profile_id is None:
+        user_id = current_user.id
     profile: UserProfileGet = await crud.get_user_profile(
-        db_session=session, profile_id=profile_id
+        db_session=session, profile_id=profile_id, user_id=user_id
     )
     return profile
 
@@ -99,11 +103,11 @@ async def get_user_handler(
     by_value: Optional[str] = None,
     by_field: Optional[str] = None,
     session: AsyncSession = Depends(get_db),
-    user_data: TokenUserData = Depends(get_current_user),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
     if by_value is None or by_field is None:
         by_field = "id"
-        by_value = user_data.id
+        by_value = current_user.id
     user: UserGet = await crud.get_user(
         db_session=session, by_field=by_field, by_value=by_value
     )

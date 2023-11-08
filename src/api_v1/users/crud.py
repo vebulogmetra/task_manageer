@@ -4,7 +4,6 @@ from uuid import UUID
 
 from sqlalchemy import delete, exists, select, update
 from sqlalchemy.engine import Result
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.users.models import User, UserProfile
@@ -73,7 +72,7 @@ async def get_users(db_session: AsyncSession) -> list[User]:
     stmt = select(User).order_by(User.created_at)
 
     result: Result = await db_session.execute(stmt)
-    users: list[User] = result.scalars().all()
+    users: list[User] | None = result.scalars().all()
     if users is None:
         raise custom_exc.not_found(entity_name=User.__name__)
     return list(users)
@@ -81,9 +80,8 @@ async def get_users(db_session: AsyncSession) -> list[User]:
 
 async def get_user(db_session: AsyncSession, by_field: str, by_value: str) -> User:
     stmt = select(User).where(getattr(User, by_field) == by_value)
-    try:
-        user: User = await db_session.scalar(stmt)
-    except NoResultFound:
+    user: User | None = await db_session.scalar(stmt)
+    if user is None:
         raise custom_exc.not_found(entity_name=User.__name__)
     return user
 
@@ -99,9 +97,9 @@ async def get_user_profile(
         stmt = select(UserProfile).where(UserProfile.id == profile_id)
     else:
         raise custom_exc.invalid_input(detail="Invalid input data")
-    try:
-        profile: UserProfile = await db_session.scalar(stmt)
-    except NoResultFound:
+
+    profile: UserProfile | None = await db_session.scalar(stmt)
+    if profile is None:
         raise custom_exc.not_found(entity_name=UserProfile.__name__)
     return profile
 
