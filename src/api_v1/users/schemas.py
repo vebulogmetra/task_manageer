@@ -15,6 +15,9 @@ class Roles(Enum):
 class User(BaseModel):
     username: str
     email: EmailStr
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    avatar_url: Optional[str] = None
     role: Roles
     is_active: bool
     is_verified: bool
@@ -25,27 +28,6 @@ class UserCreate(User):
     role: Optional[Roles] = Roles.user
     is_active: Optional[bool] = False
     is_verified: Optional[bool] = False
-
-
-class UserProfile(BaseModel):
-    id: UUID
-    first_name: str
-    last_name: str
-    avatar_url: Optional[str] = None
-
-
-class UserProfileCreate(UserProfile):
-    ...
-
-
-class UserProfileGet(UserProfile):
-    ...
-
-
-class UserProfileUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    avatar_url: Optional[str] = None
 
 
 class UserGet(User):
@@ -59,5 +41,11 @@ class SignupGet(BaseModel):
     new_user: UserGet
 
 
-class UserUpdate(User):
-    ...
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    role: Optional[Roles] = None
+    is_active: Optional[bool] = None
+    is_verified: Optional[bool] = None

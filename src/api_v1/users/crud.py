@@ -1,18 +1,12 @@
 import secrets
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import delete, exists, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.users.models import User, UserProfile
-from src.api_v1.users.schemas import (
-    UserCreate,
-    UserProfileCreate,
-    UserProfileUpdate,
-    UserUpdate,
-)
+from src.api_v1.users.models import User
+from src.api_v1.users.schemas import UserCreate, UserUpdate
 from src.utils.auth import pwd_helper
 from src.utils.exceptions import custom_exc
 
@@ -52,16 +46,6 @@ async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     return user
 
 
-async def create_user_profile(
-    db_session: AsyncSession, profile_data: UserProfileCreate
-) -> UserProfile:
-    profile_data: dict = profile_data.model_dump()
-    profile = UserProfile(**profile_data)
-    db_session.add(profile)
-    await db_session.commit()
-    return profile
-
-
 async def get_users(db_session: AsyncSession) -> list[User]:
     # options = [
     #     joinedload(User.profile),
@@ -86,24 +70,6 @@ async def get_user(db_session: AsyncSession, by_field: str, by_value: str) -> Us
     return user
 
 
-async def get_user_profile(
-    db_session: AsyncSession,
-    profile_id: Optional[UUID] = None,
-    user_id: Optional[UUID] = None,
-) -> UserProfile:
-    if user_id:
-        stmt = select(UserProfile).where(UserProfile.user_id == user_id)
-    elif profile_id:
-        stmt = select(UserProfile).where(UserProfile.id == profile_id)
-    else:
-        raise custom_exc.invalid_input(detail="Invalid input data")
-
-    profile: UserProfile | None = await db_session.scalar(stmt)
-    if profile is None:
-        raise custom_exc.not_found(entity_name=UserProfile.__name__)
-    return profile
-
-
 async def get_user_by_email(db_session: AsyncSession, email: str) -> User:
     # Not used in veiws
     stmt = select(User).where(User.email == email)
@@ -118,7 +84,7 @@ async def update_user(
         update(User)
         .returning(User)
         .where(User.id == user_id)
-        .values(**update_data.model_dump())
+        .values(**update_data.model_dump(exclude_none=True))
     )
 
     result: Result = await db_session.execute(stmt)
@@ -126,23 +92,6 @@ async def update_user(
     await db_session.commit()
     # await db_session.refresh(upd_user)
     return upd_user
-
-
-async def update_user_profile(
-    db_session: AsyncSession, user_id: UUID, update_data: UserProfileUpdate
-):
-    upd_data: dict = update_data.model_dump()
-    upd_data = [{k: v} for k, v in upd_data.items()]
-    profile: UserProfile = await db_session.scalar(
-        select(UserProfile).where(UserProfile.user_id == user_id)
-    )
-    stmt = (
-        update(UserProfile)
-        .where(UserProfile.id == profile.id)
-        .values(**update_data.model_dump())
-    )
-    await db_session.execute(stmt)
-    await db_session.commit()
 
 
 async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID:
