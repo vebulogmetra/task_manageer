@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from typing import Optional
+from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
@@ -38,6 +39,9 @@ class UserProfile(Base):
     first_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
     last_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
     avatar_url: sao.Mapped[str | None] = sao.mapped_column(sa.String(256))
+    user_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
 
     def __repr__(self):
         return f"Profile {self.first_name}"
