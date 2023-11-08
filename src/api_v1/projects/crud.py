@@ -3,11 +3,11 @@ from uuid import UUID
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 
+from src.api_v1.associates.models import UserProject
 from src.api_v1.projects.models import Project
 from src.api_v1.projects.schemas import ProjectCreate, ProjectUpdate
-from src.api_v1.users.models import User
 from src.utils.exceptions import custom_exc
 
 
@@ -22,46 +22,46 @@ async def create_project(
 
 
 async def add_user_to_project(db_session: AsyncSession, project_id: UUID, user_id: UUID):
-    project = await db_session.scalar(
-        select(Project)
-        .where(Project.id == project_id)
-        .options(
-            selectinload(Project.users),
-        ),
-    )
-    user = await db_session.scalar(select(User).where(User.id == user_id))
-    project.users.append(user)
+    user_project = UserProject(user_id=user_id, project_id=project_id)
+    db_session.add(user_project)
     await db_session.commit()
 
 
-async def get_projects(  # noqa
-    db_session: AsyncSession, users: bool, tasks: bool
-) -> list[Project]:
-    stmt = select(Project)
-
+async def get_projects(db_session: AsyncSession, users: bool) -> list[Project]:
+    stmt = select(Project).order_by(Project.created_at)
     options = []
-
     if users:
-        options.append(selectinload(Project.users))
-    if tasks:
-        options.append(selectinload(Project.tasks))
-
-    if options:
-        stmt = stmt.options(*options).order_by(Project.created_at)
-    else:
-        stmt = stmt.order_by(Project.created_at)
+        options.append(joinedload(Project.users))
+        stmt = stmt.options(*options)
 
     result: Result = await db_session.execute(stmt)
-    projects: list[Project] = result.scalars().all()
+    projects: list[Project] = result.scalars().unique()
     if projects is None:
-        raise custom_exc.not_found(entity_name=Project.__name__)
+        raise custom_exc.not_found(entity_name=f"{Project.__name__}s")
     return list(projects)
 
 
-async def get_project(db_session: AsyncSession, project_id: UUID) -> Project | None:
-    project: Project = await db_session.get(
-        Project, project_id, options=(joinedload(Project.users),)
+async def get_projects_by_owner(
+    db_session: AsyncSession, owner_id: UUID
+) -> list[Project]:
+    stmt = (
+        select(Project).where(Project.creator_id == owner_id).order_by(Project.created_at)
     )
+    result: Result = await db_session.execute(stmt)
+    projects: list[Project] = result.scalars().all()
+    if projects is None:
+        raise custom_exc.not_found(entity_name=f"{Project.__name__}s")
+    return list(projects)
+
+
+async def get_project(
+    db_session: AsyncSession, project_id: UUID, include_users: bool
+) -> Project | None:
+    stmt = (
+        select(Project).options(joinedload(Project.users)).where(Project.id == project_id)
+    )
+    result: Result = await db_session.execute(stmt)
+    project = result.scalar()
     if project is None:
         raise custom_exc.not_found(entity_name=Project.__name__)
     return project

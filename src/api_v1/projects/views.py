@@ -1,8 +1,11 @@
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.auth.schemas import TokenUserData
+from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.projects import crud
 from src.api_v1.projects.schemas import ProjectCreate, ProjectGet, ProjectUpdate
@@ -29,23 +32,36 @@ async def add_user_to_project_handler(
     return StatusMsg(status="ok", detail=f"User {user_id} added in project {project_id}")
 
 
-@router.get("/projects", response_model=list[ProjectGet])
+# @router.get("/projects", response_model=list[ProjectGet])
+@router.get("/projects")
 async def get_projects_handler(
     include_users: bool = False,
-    include_tasks: bool = False,
     session: AsyncSession = Depends(get_db),
 ):
-    return await crud.get_projects(
-        db_session=session, users=include_users, tasks=include_tasks
-    )
+    return await crud.get_projects(db_session=session, users=include_users)
 
 
-@router.get("/project/{project_id}", response_model=ProjectGet)
+@router.get("/projects_by_owner", response_model=list[ProjectGet])
+async def get_projects_by_owner_handler(
+    owner_id: Optional[str] = None,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
+):
+    if owner_id is None:
+        owner_id = current_user.id
+    return await crud.get_projects_by_owner(db_session=session, owner_id=owner_id)
+
+
+# @router.get("/project", response_model=ProjectGet)
+@router.get("/project")
 async def get_project_by_id_handler(
     project_id: str,
+    include_users: Optional[bool] = False,
     session: AsyncSession = Depends(get_db),
 ):
-    project = await crud.get_project(db_session=session, project_id=project_id)
+    project = await crud.get_project(
+        db_session=session, project_id=project_id, include_users=include_users
+    )
     return project
 
 
