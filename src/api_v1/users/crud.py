@@ -1,4 +1,5 @@
 import secrets
+from pathlib import Path
 from uuid import UUID
 
 from sqlalchemy import delete, exists, select, update
@@ -95,10 +96,20 @@ async def update_user(
 
 
 async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID:
-    stmt = delete(User).returning(User.id).where(User.id == user_id)
+    stmt = delete(User).returning(User).where(User.id == user_id)
     result: Result = await db_session.execute(stmt)
-    user_id: UUID | None = result.scalar()
-    if user_id is None:
+    user: User = result.scalar()
+    if user is None:
         raise custom_exc.not_found(entity_name=User.__name__)
+    try:
+        # :TODO Replace to settings root path
+        filepath = Path(f"src/front/static/profileimages/{user.avatar_url}")
+        if filepath.is_file():
+            filepath.unlink()
+        else:
+            print("File do not delete. Is not exists")
+    except Exception as e:
+        # :TODO Remove. Change to logger
+        print(f"Delete file error: {e}")
     await db_session.commit()
     return user_id

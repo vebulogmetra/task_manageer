@@ -46,6 +46,7 @@ async def upload_avatar_picture(
     session: AsyncSession = Depends(get_db),
     current_user: TokenUserData = Depends(get_current_user),
 ):
+    # :TODO Resize images
     if user_id is None:
         user_id = current_user.id
 
@@ -55,7 +56,7 @@ async def upload_avatar_picture(
     name, ext = secure_name.split(".")
     randon_hash = secrets.token_urlsafe(8)
     picture_filename = f"{name}_{randon_hash}.{ext}"
-
+    # :TODO Replace to settings root path
     with open(f"src/front/static/profileimages/{picture_filename}", "wb") as buffer:
         shutil.copyfileobj(picture.file, buffer)
 
