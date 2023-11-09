@@ -22,11 +22,9 @@ class Project(Base):
     )
 
     description: sao.Mapped[str] = sao.mapped_column(sa.Text(), nullable=True)
-    creator_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
+    creator_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
     team_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("teams.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True
+        sa.ForeignKey("teams.id"), nullable=True
     )
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
@@ -37,11 +35,11 @@ class Project(Base):
     )
 
     users: sao.Mapped[list[User]] = sao.relationship(
-        secondary="users_projects", back_populates="projects"
+        secondary="users_projects", back_populates="projects", lazy="joined"
     )
 
     def __str__(self):
-        return f"Project {self.name}"
+        return f"Project {self.__table__.columns}"
 
     def __repr__(self):
         return str(self)

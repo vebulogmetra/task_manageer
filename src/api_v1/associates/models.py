@@ -23,8 +23,12 @@ class UserProject(Base):
     id: sao.Mapped[UUID] = sao.mapped_column(
         primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")
     )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
-    project_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("projects.id"))
+    user_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    project_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("projects.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
 
     # # association between Assocation -> Order
     # order: Mapped["Order"] = relationship(
@@ -49,8 +53,12 @@ class UserTask(Base):
     id: sao.Mapped[UUID] = sao.mapped_column(
         primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")
     )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
-    task_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("tasks.id"))
+    user_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    task_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("tasks.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
 
 
 class UserTeam(Base):
@@ -66,5 +74,9 @@ class UserTeam(Base):
     id: sao.Mapped[UUID] = sao.mapped_column(
         primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")
     )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
-    team_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("teams.id"))
+    user_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    team_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("teams.id", ondelete="CASCADE", onupdate="CASCADE")
+    )

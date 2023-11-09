@@ -1,10 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class WithUser(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     username: str
     email: str
@@ -15,6 +16,7 @@ class WithUser(BaseModel):
 
 
 class WithTask(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     title: str
     description: str
@@ -28,6 +30,7 @@ class WithTask(BaseModel):
 
 
 class WithProject(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     name: str
     description: str
@@ -37,6 +40,7 @@ class WithProject(BaseModel):
 
 
 class WithTeam(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     title: str
     creator_id: UUID

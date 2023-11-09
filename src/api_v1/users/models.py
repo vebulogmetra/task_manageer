@@ -36,8 +36,11 @@ class User(Base):
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
     projects: sao.Mapped[list[Project]] = sao.relationship(
-        secondary="users_projects", back_populates="users"
+        secondary="users_projects", back_populates="users", lazy="joined"
     )
+
+    def __str__(self) -> str:
+        return f"User {self.__table__.columns}"
 
     def __repr__(self):
         return f"User {self.username}"

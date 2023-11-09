@@ -23,12 +23,8 @@ class Task(Base):
         sa.String(), default="low", server_default="low"
     )  # low, medium, high
     due_date: sao.Mapped[datetime.datetime] = sao.mapped_column(sa.DateTime())
-    creator_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
-    project_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("projects.id", onupdate="CASCADE", ondelete="CASCADE")
-    )
+    creator_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
+    project_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("projects.id"))
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
