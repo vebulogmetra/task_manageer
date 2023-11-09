@@ -12,6 +12,12 @@ class Roles(Enum):
     creator = "creator"
 
 
+class GetUserFields(Enum):
+    id = "id"
+    username = "username"
+    email = "email"
+
+
 class User(BaseModel):
     username: str
     email: EmailStr

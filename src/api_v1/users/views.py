@@ -11,7 +11,13 @@ from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.users import crud
-from src.api_v1.users.schemas import SignupGet, UserCreate, UserGet, UserUpdate
+from src.api_v1.users.schemas import (
+    GetUserFields,
+    SignupGet,
+    UserCreate,
+    UserGet,
+    UserUpdate,
+)
 from src.utils.database import get_db
 
 router = APIRouter()
@@ -82,15 +88,16 @@ async def get_users_handler(
 @router.get("/user", response_model=UserGet)
 async def get_user_handler(
     by_value: Optional[str] = None,
-    by_field: Optional[str] = None,
+    by_field: Optional[GetUserFields] = None,
     session: AsyncSession = Depends(get_db),
     current_user: TokenUserData = Depends(get_current_user),
 ):
-    if by_value is None or by_field is None:
-        by_field = "id"
+    if by_value is None:
+        by_field = GetUserFields.id.value
         by_value = current_user.id
+
     user: UserGet = await crud.get_user(
-        db_session=session, by_field=by_field, by_value=by_value
+        db_session=session, by_field=by_field.value, by_value=by_value
     )
     return user
 

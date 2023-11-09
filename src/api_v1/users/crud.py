@@ -7,7 +7,8 @@ from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.users.models import User
-from src.api_v1.users.schemas import UserCreate, UserUpdate
+from src.api_v1.users.schemas import GetUserFields, UserCreate, UserUpdate
+from src.api_v1.users.utils import is_valid_uuid
 from src.utils.auth import pwd_helper
 from src.utils.exceptions import custom_exc
 
@@ -64,6 +65,11 @@ async def get_users(db_session: AsyncSession) -> list[User]:
 
 
 async def get_user(db_session: AsyncSession, by_field: str, by_value: str) -> User:
+    if by_field == GetUserFields.id.value:
+        is_uuid: bool = is_valid_uuid(value=by_value)
+        if is_uuid is False:
+            raise custom_exc.invalid_input(detail="id must by valid type UUID4")
+
     stmt = select(User).where(getattr(User, by_field) == by_value)
     user: User | None = await db_session.scalar(stmt)
     if user is None:
