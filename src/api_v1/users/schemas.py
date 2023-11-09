@@ -33,8 +33,8 @@ class User(BaseModel):
 class UserCreate(User):
     password: str
     role: Optional[Roles] = Roles.user
-    is_active: Optional[bool] = False
-    is_verified: Optional[bool] = False
+    is_active: Optional[bool] = True
+    is_verified: Optional[bool] = True
 
 
 class UserGet(User):
