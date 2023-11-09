@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from src.api_v1.associates.schemas import WithTask, WithUser
+from src.api_v1.associates.schemas import WithUser
 
 
 class Project(BaseModel):
@@ -13,18 +13,23 @@ class Project(BaseModel):
     creator_id: UUID
 
 
+class AddUserToProject(BaseModel):
+    project_id: UUID
+    user_id: Optional[UUID] = None
+
+
 class ProjectCreate(Project):
-    ...
+    creator_id: Optional[UUID] = None
 
 
 class ProjectGet(Project):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
     users: Optional[list[WithUser]] = []
-    tasks: Optional[list[WithTask]] = []
     created_at: datetime
     updated_at: datetime
 
 
-class ProjectUpdate(Project):
-    ...
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None

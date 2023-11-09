@@ -8,7 +8,12 @@ from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.projects import crud
-from src.api_v1.projects.schemas import ProjectCreate, ProjectGet, ProjectUpdate
+from src.api_v1.projects.schemas import (
+    AddUserToProject,
+    ProjectCreate,
+    ProjectGet,
+    ProjectUpdate,
+)
 from src.utils.database import get_db
 
 router = APIRouter()
@@ -18,27 +23,35 @@ router = APIRouter()
 async def create_project_handler(
     project_data: ProjectCreate,
     session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
+    if project_data.creator_id is None:
+        project_data.creator_id = current_user.id
     return await crud.create_project(db_session=session, project_data=project_data)
 
 
 @router.post("/add_user", response_model=StatusMsg)
 async def add_user_to_project_handler(
-    project_id: str, user_id: str, session: AsyncSession = Depends(get_db)
+    data: AddUserToProject,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
-    await crud.add_user_to_project(
-        db_session=session, project_id=project_id, user_id=user_id
+    if data.user_id is None:
+        data.user_id = current_user.id
+    await crud.add_user_to_project(db_session=session, data=data)
+    return StatusMsg(
+        status="ok",
+        detail=f"User {data.user_id} added in project {data.project_id}",
     )
-    return StatusMsg(status="ok", detail=f"User {user_id} added in project {project_id}")
 
 
-# @router.get("/projects", response_model=list[ProjectGet])
-@router.get("/projects")
+@router.get("/projects", response_model=list[ProjectGet])
 async def get_projects_handler(
-    include_users: bool = False,
+    limit: Optional[int] = 100,
+    offset: Optional[int] = 0,
     session: AsyncSession = Depends(get_db),
 ):
-    return await crud.get_projects(db_session=session, users=include_users)
+    return await crud.get_projects(db_session=session, limit=limit, offset=offset)
 
 
 @router.get("/projects_by_owner", response_model=list[ProjectGet])
@@ -52,32 +65,32 @@ async def get_projects_by_owner_handler(
     return await crud.get_projects_by_owner(db_session=session, owner_id=owner_id)
 
 
-# @router.get("/project", response_model=ProjectGet)
-@router.get("/project")
+@router.get("/project", response_model=ProjectGet)
 async def get_project_by_id_handler(
     project_id: str,
-    include_users: Optional[bool] = False,
     session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
-    project = await crud.get_project(
-        db_session=session, project_id=project_id, include_users=include_users
-    )
+    project = await crud.get_project(db_session=session, project_id=project_id)
     return project
 
 
-@router.put("/update/{project_id}", response_model=ProjectGet)
+@router.put(
+    "/update",
+    response_model=ProjectGet,
+)
 async def update_project_handler(
     project_id: str,
     update_data: ProjectUpdate,
     session: AsyncSession = Depends(get_db),
 ):
-    upd_project: ProjectGet = await crud.update_project(
+    upd_project = await crud.update_project(
         db_session=session, project_id=project_id, update_data=update_data
     )
     return upd_project
 
 
-@router.delete("/delete/{project_id}", response_model=StatusMsg)
+@router.delete("/delete", response_model=StatusMsg)
 async def delete_project_handler(
     project_id: str,
     session: AsyncSession = Depends(get_db),
