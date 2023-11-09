@@ -69,6 +69,37 @@ class LoginForm:
         return False
 
 
+class SignupForm:
+    def __init__(self, request: Request):
+        self.request: Request = request
+        self.errors: list = []
+
+        self.username: Optional[str] = None
+        self.email: Optional[str] = None
+        self.first_name: Optional[str] = None
+        self.last_name: Optional[str] = None
+        self.role: Optional[str] = "user"
+        self.password: Optional[str] = None
+
+    async def load_data(self):
+        form = await self.request.form()
+        self.username = form.get("username")
+        self.email = form.get("email")
+        self.first_name = form.get("first_name")
+        self.last_name = form.get("last_name")
+        self.role = form.get("role")
+        self.password = form.get("password")
+
+    async def is_valid(self):
+        if not self.email or not (self.email.__contains__("@")):
+            self.errors.append("A valid email is required")
+        if not self.password or not len(self.password) >= 2:
+            self.errors.append("A valid password is required")
+        if not self.errors:
+            return True
+        return False
+
+
 def get_current_user_from_cookie(request: Request) -> TokenUserData:
     try:
         token: str = request.cookies.get(settings.cookie_name_access).split(" ")[1]
