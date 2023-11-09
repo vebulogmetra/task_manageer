@@ -13,6 +13,22 @@ def test_create_user(client: TestClient):
     user_id = str(response.json().get("id"))
     test_user.id = user_id
 
+    # Try user login (invalid pwd)
+    response = client.post(
+        "/api/v1/auth/login",
+        headers=test_const.user_login_headers,
+        data={"username": test_user.email, "password": "bad_password"},
+    )
+    assert response.status_code == test_status.unauthorized
+
+    # Try user login (invalid email)
+    response = client.post(
+        "/api/v1/auth/login",
+        headers=test_const.user_login_headers,
+        data={"username": "invalid@email.su", "password": test_user.password},
+    )
+    assert response.status_code == test_status.unauthorized
+
     # Try user login
     response = client.post(
         "/api/v1/auth/login",
@@ -26,6 +42,23 @@ def test_create_user(client: TestClient):
 
 def test_get_user(client: TestClient, access_token):
     auth_header = {"Authorization": f"bearer {access_token}"}
+
+    # Try get user by id (invalid by_field param)
+    response = client.get(
+        test_api.user_get,
+        params={"by_field": "bad_field", "by_value": test_user.id},
+        headers=auth_header,
+    )
+    assert response.status_code == test_status.invalid_input
+
+    # Try get user by id (invalid by_value param)
+    response = client.get(
+        test_api.user_get,
+        params={"by_field": "id", "by_value": "invalid_user_id"},
+        headers=auth_header,
+    )
+    assert response.status_code == test_status.invalid_input
+
     # Try get user by id
     response = client.get(
         test_api.user_get,
@@ -90,7 +123,8 @@ def test_update_user(client: TestClient, access_token):
 
 def test_delete_user(client: TestClient, access_token):
     auth_header = {"Authorization": f"bearer {access_token}"}
-    # Delete user last_name
+
+    # Delete user
     response = client.delete(
         test_api.user_delete,
         params={"user_id": test_user.id},
@@ -105,3 +139,17 @@ def test_delete_user(client: TestClient, access_token):
         headers=auth_header,
     )
     assert response.status_code == test_status.notfound
+
+    # Create user without picture
+    response = client.post(test_api.user_create, json=test_user.to_dict())
+    assert response.status_code == test_status.success
+    user_id = str(response.json().get("id"))
+    test_user.id = user_id
+
+    # Delete user
+    response = client.delete(
+        test_api.user_delete,
+        params={"user_id": test_user.id},
+        headers=auth_header,
+    )
+    assert response.status_code == test_status.success

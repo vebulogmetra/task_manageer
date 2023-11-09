@@ -32,6 +32,8 @@ class Endpoint:
 class HttpStatus:
     success = 200
     notfound = 404
+    unauthorized = 401
+    invalid_input = 422
 
 
 class Constant:
