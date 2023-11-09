@@ -18,7 +18,7 @@ async def create_project(
     project = Project(**project_data.model_dump())
     db_session.add(project)
     await db_session.commit()
-    await db_session.refresh(project)  # Если на стороне БД генертся данные
+    await db_session.refresh(project)
     return project
 
 

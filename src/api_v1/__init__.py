@@ -8,6 +8,7 @@ from src.api_v1.projects.views import router as projects_router
 from src.api_v1.tasks.models import Task, TaskComment
 from src.api_v1.tasks.views import router as tasks_router
 from src.api_v1.teams.models import Team
+from src.api_v1.teams.views import router as teams_router
 from src.api_v1.users.models import User
 from src.api_v1.users.views import router as users_router
 
@@ -46,4 +47,10 @@ main_router.include_router(
     router=tasks_router,
     prefix="/tasks",
     tags=["Tasks"],
+)
+
+main_router.include_router(
+    router=teams_router,
+    prefix="/teams",
+    tags=["Teams"],
 )
