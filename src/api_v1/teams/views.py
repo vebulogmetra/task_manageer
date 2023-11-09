@@ -4,9 +4,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.auth.schemas import TokenUserData
+from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.teams import crud
-from src.api_v1.teams.schemas import TeamCreate, TeamGet, TeamUpdate
+from src.api_v1.teams.schemas import AddUserToTeam, TeamCreate, TeamGet, TeamUpdate
 from src.utils.database import get_db
 
 router = APIRouter()
@@ -16,32 +18,48 @@ router = APIRouter()
 async def create_team_handler(
     team_data: TeamCreate,
     session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
+    team_data: dict = team_data.model_dump()
+    team_data.update({"creator_id": current_user.id})
     return await crud.create_team(db_session=session, team_data=team_data)
+
+
+@router.post("/add_user", response_model=StatusMsg)
+async def add_user_to_team_handler(
+    data: AddUserToTeam,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
+):
+    if data.user_id is None:
+        data.user_id = current_user.id
+    await crud.add_user_to_team(db_session=session, data=data)
+    return StatusMsg(
+        status="ok", detail=f"User {data.user_id} added in team {data.team_id}"
+    )
 
 
 @router.get("/teams", response_model=list[TeamGet])
 async def get_teams_handler(
-    projects: Optional[bool] = False,
+    limit: Optional[int] = 100,
+    offset: Optional[int] = 0,
     session: AsyncSession = Depends(get_db),
 ):
-    teams = await crud.get_teams(db_session=session, projects=projects)
+    teams = await crud.get_teams(db_session=session, limit=limit, offset=offset)
     return teams
 
 
-@router.get("/team/{team_id}", response_model=TeamGet)
+@router.get("/team", response_model=TeamGet)
 async def get_team_handler(
-    by_value: Optional[str] = None,
-    by_field: Optional[str] = None,
+    team_id: str,
     session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
 ):
-    team: TeamGet = await crud.get_team(
-        db_session=session, by_field=by_field, by_value=by_value
-    )
+    team: TeamGet = await crud.get_team(db_session=session, team_id=team_id)
     return team
 
 
-@router.put("/update/{team_id}", response_model=TeamGet)
+@router.put("/update", response_model=TeamGet)
 async def update_team_handler(
     team_id: str,
     update_data: TeamUpdate,
@@ -53,7 +71,7 @@ async def update_team_handler(
     return upd_team
 
 
-@router.delete("/delete/{team_id}", response_model=StatusMsg)
+@router.delete("/delete", response_model=StatusMsg)
 async def delete_team_handler(
     team_id: str,
     session: AsyncSession = Depends(get_db),

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.api_v1.associates.schemas import WithUser
 
@@ -14,7 +14,7 @@ class TaskComment(BaseModel):
 
 
 class TaskCommentCreate(TaskComment):
-    ...
+    user_id: Optional[UUID] = None
 
 
 class TaskCommentUpdate(TaskComment):
@@ -39,16 +39,27 @@ class Task(BaseModel):
 
 
 class TaskCreate(Task):
-    due_date: datetime = datetime.now()
+    model_config = ConfigDict()
+    due_date: datetime = Field(datetime.now())
+    creator_id: UUID = Field(None, exclude=True)
+
+
+class AddUserToTask(BaseModel):
+    task_id: UUID
+    user_id: Optional[UUID] = None
 
 
 class TaskGet(Task):
     id: UUID
-    users: Optional[list[WithUser]]
-    comments: Optional[list[TaskCommentGet]]
+    users: Optional[list[WithUser]] = []
+    comments: Optional[list[TaskCommentGet]] = []
     created_at: datetime
     updated_at: datetime
 
 
-class TaskUpdate(Task):
-    ...
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    due_date: Optional[datetime] = None

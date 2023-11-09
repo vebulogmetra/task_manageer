@@ -4,10 +4,11 @@ from sqlalchemy import delete, exists, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
+from src.api_v1.associates.models import UserTeam
+from src.api_v1.base.utils import is_valid_uuid
 from src.api_v1.teams.models import Team
-from src.api_v1.teams.schemas import TeamCreate, TeamUpdate
+from src.api_v1.teams.schemas import AddUserToTeam, TeamCreate, TeamUpdate
 from src.utils.exceptions import custom_exc
 
 
@@ -27,26 +28,27 @@ async def create_team(db_session: AsyncSession, team_data: TeamCreate) -> Team:
     return team
 
 
-async def get_teams(db_session: AsyncSession, projects: bool) -> list[Team]:  # noqa
-    stmt = select(Team)
-    options = []
+async def add_user_to_team(db_session: AsyncSession, data: AddUserToTeam):
+    user_team = UserTeam(**data.model_dump())
+    db_session.add(user_team)
+    await db_session.commit()
 
-    if projects:
-        options.append(selectinload(Team.projects))
 
-    if options:
-        stmt = stmt.options(*options).order_by(Team.created_at)
-    else:
-        stmt = stmt.order_by(Team.created_at)
+async def get_teams(db_session: AsyncSession, limit: int, offset: int) -> list[Team]:
+    stmt = select(Team).limit(limit).offset(offset).order_by(Team.created_at)
+
     result: Result = await db_session.execute(stmt)
-    teams: list[Team] = result.scalars().all()
+    teams: list[Team] = result.scalars().unique()
     if teams is None:
         raise custom_exc.not_found(entity_name=Team.__name__)
     return list(teams)
 
 
-async def get_team(db_session: AsyncSession, by_field: str, by_value: str) -> Team:
-    stmt = select(Team).where(getattr(Team, by_field) == by_value)
+async def get_team(db_session: AsyncSession, team_id: UUID) -> Team:
+    is_uuid: bool = is_valid_uuid(value=team_id)
+    if is_uuid is False:
+        raise custom_exc.invalid_input(detail="team id must by valid type UUID4")
+    stmt = select(Team).where(Team.id == team_id)
     try:
         team: Team = await db_session.scalar(stmt)
     except NoResultFound:
@@ -61,12 +63,13 @@ async def update_team(
         update(Team)
         .returning(Team)
         .where(Team.id == team_id)
-        .values(**update_data.model_dump())
+        .values(**update_data.model_dump(exclude_none=True))
     )
 
     result: Result = await db_session.execute(stmt)
-    upd_team: Team = result.scalar()
+    upd_team = result.scalar()
     await db_session.commit()
+    await db_session.refresh(upd_team)
     return upd_team
 
 

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
 
 from src.api_v1.base.models import Base
+
+if TYPE_CHECKING:
+    from src.api_v1.users.models import User
 
 
 class Task(Base):
@@ -32,6 +36,18 @@ class Task(Base):
         server_default=sa.text("date_trunc('seconds', now()::timestamp)"),
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
     )
+    users: sao.Mapped[list[User]] = sao.relationship(
+        secondary="users_tasks", back_populates="tasks", lazy="joined"
+    )
+    comments: sao.Mapped[list[TaskComment]] = sao.relationship(
+        "TaskComment", lazy="joined"
+    )
+
+    def __str__(self):
+        return f"Task {self.__table__.columns}"
+
+    def __repr__(self):
+        return str(self)
 
 
 class TaskComment(Base):

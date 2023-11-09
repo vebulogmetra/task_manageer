@@ -28,7 +28,6 @@ async def signup_user_handler(
     user_data: UserCreate,
     session: AsyncSession = Depends(get_db),
 ):
-    user_data.role = user_data.role.value
     new_user: UserGet = await crud.signup_user(db_session=session, user_data=user_data)
     verif_code: str = crud.after_signup_user()
     return {"verif_code": verif_code, "new_user": new_user}
@@ -39,7 +38,6 @@ async def create_user_handler(
     user_data: UserCreate,
     session: AsyncSession = Depends(get_db),
 ):
-    user_data.role = user_data.role.value
     return await crud.create_user(db_session=session, user_data=user_data)
 
 
@@ -93,8 +91,8 @@ async def get_user_handler(
     current_user: TokenUserData = Depends(get_current_user),
 ):
     if by_value is None:
-        by_field = GetUserFields.id.value
-        by_value = current_user.id
+        by_field = GetUserFields.id
+        by_value = str(current_user.id)
 
     user: UserGet = await crud.get_user(
         db_session=session, by_field=by_field.value, by_value=by_value

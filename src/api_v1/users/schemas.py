@@ -19,6 +19,7 @@ class GetUserFields(Enum):
 
 
 class User(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
     username: str
     email: EmailStr
     first_name: Optional[str] = None

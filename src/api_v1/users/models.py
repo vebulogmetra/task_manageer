@@ -10,6 +10,8 @@ from src.api_v1.base.models import Base
 
 if TYPE_CHECKING:
     from src.api_v1.projects.models import Project
+    from src.api_v1.tasks.models import Task
+    from src.api_v1.teams.models import Team
 
 
 class User(Base):
@@ -37,6 +39,14 @@ class User(Base):
     )
     projects: sao.Mapped[list[Project]] = sao.relationship(
         secondary="users_projects", back_populates="users", lazy="joined"
+    )
+
+    tasks: sao.Mapped[list[Task]] = sao.relationship(
+        secondary="users_tasks", back_populates="users"
+    )
+
+    teams: sao.Mapped[list[Team]] = sao.relationship(
+        secondary="users_teams", back_populates="users"
     )
 
     def __str__(self) -> str:
