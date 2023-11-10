@@ -24,6 +24,7 @@ class User(Base):
     )
     first_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
     last_name: sao.Mapped[str | None] = sao.mapped_column(sa.String(32))
+    position: sao.Mapped[str | None] = sao.mapped_column(sa.String(64))
     avatar_url: sao.Mapped[str | None] = sao.mapped_column(sa.String(256))
     role: sao.Mapped[str] = sao.mapped_column(
         sa.String(32), default="user", nullable=False
@@ -42,11 +43,11 @@ class User(Base):
     )
 
     tasks: sao.Mapped[list[Task]] = sao.relationship(
-        secondary="users_tasks", back_populates="users"
+        secondary="users_tasks", back_populates="users", lazy="joined"
     )
 
     teams: sao.Mapped[list[Team]] = sao.relationship(
-        secondary="users_teams", back_populates="users"
+        secondary="users_teams", back_populates="users", lazy="joined"
     )
 
     def __str__(self) -> str:
