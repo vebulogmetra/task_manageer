@@ -8,7 +8,7 @@ from src.api_v1.associates.schemas import WithUser
 
 
 class Project(BaseModel):
-    name: str
+    title: str
     description: str
     creator_id: UUID
 

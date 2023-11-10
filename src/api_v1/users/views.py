@@ -73,8 +73,7 @@ async def upload_avatar_picture(
     return StatusMsg(status="ok", detail=f"{secure_name} has been Successfully Uploaded")
 
 
-# @router.get("/users", response_model=list[UserGet])
-@router.get("/users")
+@router.get("/users", response_model=list[UserGet])
 async def get_users_handler(
     session: AsyncSession = Depends(get_db),
     _: TokenUserData = Depends(get_current_user),

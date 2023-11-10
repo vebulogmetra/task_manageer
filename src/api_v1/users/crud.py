@@ -49,12 +49,6 @@ async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
 
 
 async def get_users(db_session: AsyncSession) -> list[User]:
-    # options = [
-    #     joinedload(User.profile),
-    #     selectinload(User.projects),
-    #     selectinload(User.tasks),
-    # ]
-
     stmt = select(User).order_by(User.created_at)
 
     result: Result = await db_session.execute(stmt)

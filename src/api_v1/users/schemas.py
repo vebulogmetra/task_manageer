@@ -5,6 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from src.api_v1.associates.schemas import WithProject, WithTask, WithTeam
+
 
 class Roles(Enum):
     user = "user"
@@ -24,6 +26,7 @@ class User(BaseModel):
     email: EmailStr
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    position: str
     avatar_url: Optional[str] = None
     role: Roles
     is_active: bool
@@ -33,6 +36,8 @@ class User(BaseModel):
 class UserCreate(User):
     password: str
     role: Optional[Roles] = Roles.user
+    position: Optional[str] = "developer"
+    avatar_url: Optional[str] = "default.png"
     is_active: Optional[bool] = True
     is_verified: Optional[bool] = True
 
@@ -40,6 +45,9 @@ class UserCreate(User):
 class UserGet(User):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
+    projects: Optional[list[WithProject]] = []
+    tasks: Optional[list[WithTask]] = []
+    teams: Optional[list[WithTeam]] = []
     created_at: datetime
 
 

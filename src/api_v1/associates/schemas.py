@@ -32,7 +32,7 @@ class WithTask(BaseModel):
 class WithProject(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    name: str
+    title: str
     description: str
     creator_id: UUID
     created_at: datetime
