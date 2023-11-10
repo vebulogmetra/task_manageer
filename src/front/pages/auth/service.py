@@ -7,8 +7,10 @@ from fastapi.security import OAuth2
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import TokenUserData
+from src.api_v1.users.crud import check_exists_user
 from src.core.config import settings
 from src.utils.exceptions import custom_exc
 
@@ -61,8 +63,8 @@ class LoginForm:
 
     async def is_valid(self):
         if not self.username or not (self.username.__contains__("@")):
-            self.errors.append("Email is required")
-        if not self.password or not len(self.password) >= 2:
+            self.errors.append("A valid email is required")
+        if not self.password or not len(self.password) >= 3:
             self.errors.append("A valid password is required")
         if not self.errors:
             return True
@@ -78,23 +80,39 @@ class SignupForm:
         self.email: Optional[str] = None
         self.first_name: Optional[str] = None
         self.last_name: Optional[str] = None
-        self.role: Optional[str] = "user"
+        self.role: Optional[str] = None
         self.password: Optional[str] = None
 
     async def load_data(self):
         form = await self.request.form()
-        self.username = form.get("username")
-        self.email = form.get("email")
-        self.first_name = form.get("first_name")
-        self.last_name = form.get("last_name")
-        self.role = form.get("role")
+        self.username = form.get("username").lower()
+        self.email = form.get("email").lower()
+        self.first_name = form.get("first_name").capitalize()
+        self.last_name = form.get("last_name").capitalize()
+        self.role = form.get("role").lower()
         self.password = form.get("password")
 
-    async def is_valid(self):
+    async def is_valid(self, db_session: AsyncSession):
         if not self.email or not (self.email.__contains__("@")):
             self.errors.append("A valid email is required")
-        if not self.password or not len(self.password) >= 2:
-            self.errors.append("A valid password is required")
+        if not self.password or not len(self.password) >= 3:
+            self.errors.append("Password is required and must be > 3 chars")
+        if not self.first_name or not self.first_name.isalpha():
+            self.errors.append("First name is required and can contain only letters")
+        if not self.last_name or not self.first_name.isalpha():
+            self.errors.append("Last name is required and can contain only letters")
+        if await check_exists_user(
+            db_session=db_session,
+            by_field="email",
+            by_value=self.email,
+        ):
+            self.errors.append("This email address is already registered")
+        if await check_exists_user(
+            db_session=db_session,
+            by_field="username",
+            by_value=self.username,
+        ):
+            self.errors.append("This username is already registered")
         if not self.errors:
             return True
         return False
