@@ -73,7 +73,7 @@ class UserAdmin(ModelView, model=User):
 
 
 class ProjectAdmin(ModelView, model=Project):
-    column_list = [Project.id, Project.name, Project.creator_id]
+    column_list = [Project.id, Project.title, Project.creator_id]
 
 
 class TeamAdmin(ModelView, model=Team):

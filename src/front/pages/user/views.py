@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.users.models import User
-from src.api_v1.users.schemas import UserGet
+from src.api_v1.users.schemas import GetUserFields, UserGet
 from src.api_v1.users.views import get_user_handler, get_users_handler
+from src.core.config import settings
 from src.front.pages.auth.service import get_current_user_from_cookie
 from src.utils.database import get_db
 from src.utils.exceptions import EmptyAuthCookie
@@ -17,13 +18,18 @@ templates = Jinja2Templates(directory="src/front/templates")
 
 
 @router.get("/current_user")
-def get_current_user_id(request: Request):
+async def get_current_user_id(request: Request, session: AsyncSession = Depends(get_db)):
     try:
-        user = get_current_user_from_cookie(request)
+        current_user = get_current_user_from_cookie(request)
     except EmptyAuthCookie:
-        user = None
+        return RedirectResponse(
+            url=f"{settings.front_prefix}/login",
+            status_code=status.HTTP_302_FOUND,
+        )
+    if current_user:
+        user: User = await get_user_handler(session=session, current_user=current_user)
     context = {
-        "user": user,
+        "user": UserGet.model_validate(user),
         "request": request,
     }
     return templates.TemplateResponse("user.html", context)
@@ -36,17 +42,19 @@ async def user_page(
     try:
         current_user: TokenUserData = get_current_user_from_cookie(request)
     except EmptyAuthCookie:
-        current_user = None
+        return RedirectResponse(
+            url=f"{settings.front_prefix}/login",
+            status_code=status.HTTP_302_FOUND,
+        )
     if current_user:
         user: User = await get_user_handler(
-            by_field="id", by_value=user_id, session=session, user_data=current_user
+            by_field=GetUserFields.id,
+            by_value=user_id,
+            session=session,
+            current_user=current_user,
         )
-    # print(f"USER TEMAS: {user.teams}")
-    # user: UserGet = UserGet.model_validate(user)
-    # user.role = user.role.value
-    # print(f"USER: {user}")
     context = {
-        "user": user,
+        "user": UserGet.model_validate(user),
         "request": request,
     }
     return templates.TemplateResponse("user.html", context)
@@ -59,11 +67,9 @@ async def user_search_page(request: Request, session: AsyncSession = Depends(get
     except EmptyAuthCookie:
         current_user = None
     if current_user:
-        users: list[UserGet] = await get_users_handler(
-            session=session, user_data=current_user
-        )
+        users: list[User] = await get_users_handler(session=session, _=current_user)
     context = {
-        "users": users,
+        "users": [UserGet.model_validate(u) for u in users],
         "request": request,
     }
     return templates.TemplateResponse("search.html", context)

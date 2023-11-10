@@ -27,7 +27,7 @@ def signup_page(request: Request):
 async def signup_post(request: Request, session: AsyncSession = Depends(get_db)):
     form = SignupForm(request)
     await form.load_data()
-    if await form.is_valid():
+    if await form.is_valid(db_session=session):
         try:
             response = RedirectResponse(
                 f"{settings.front_prefix}/", status.HTTP_302_FOUND
@@ -35,19 +35,15 @@ async def signup_post(request: Request, session: AsyncSession = Depends(get_db))
             user_data = {
                 "username": form.username,
                 "email": form.email,
-                "role": form.role.lower(),
+                "role": form.role,
                 "first_name": form.first_name,
                 "last_name": form.last_name,
                 "password": form.password,
             }
-            print(f"FORM ROLE : {form.role}")
-            print(f"FORM ROLE T : {type(form.role)}")
-            print(f"FORM ROLE str: {str(form.role)}")
             user_data = UserCreate(**user_data)
             await signup_user_handler(user_data=user_data, session=session)
             return response
         except HTTPException:
-            form.__dict__.update(msg="")
             form.__dict__.get("errors").append("Incorrect Email or Password")
             return templates.TemplateResponse("signup.html", form.__dict__)
     return templates.TemplateResponse("signup.html", form.__dict__)
@@ -71,10 +67,8 @@ async def login_post(request: Request, session: AsyncSession = Depends(get_db)):
             await login_for_access_token(
                 response=response, auth_data=form, session=session
             )
-            form.__dict__.update(msg="Login Successful!")
             return response
         except HTTPException:
-            form.__dict__.update(msg="")
             form.__dict__.get("errors").append("Incorrect Email or Password")
             return templates.TemplateResponse("login.html", form.__dict__)
     return templates.TemplateResponse("login.html", form.__dict__)
