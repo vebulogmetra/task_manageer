@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', path='/css/project_style.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card text-dark bg-light mb-3 mt-3" style="max-width: 30rem;">
+    <div class="card-header"><span style="font-size: 14px; color: #d6d6d6;">{{ project.title }}</span></div>
+    <div class="card-body">
+      <h5 class="card-title">{{ project.title }}</h5>
+      <hr>
+      <p class="card-text">{{ project.description }}</p>
+      <hr>
+      <p class="card-text">Assigned users:</p>
+      <ul class="text-reset">
+        {% for user in project.users %}
+        <li><a href="/front/pages/user/{{ user.id }}">{{ user.username }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}
