@@ -2,30 +2,9 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from src.api_v1.associates.schemas import WithUser
-
-
-class TaskComment(BaseModel):
-    content: str
-    user_id: UUID
-    task_id: UUID
-
-
-class TaskCommentCreate(TaskComment):
-    user_id: Optional[UUID] = None
-
-
-class TaskCommentUpdate(TaskComment):
-    ...
-
-
-class TaskCommentGet(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: UUID
-    content: str
-    created_at: datetime
 
 
 class Task(BaseModel):
@@ -44,9 +23,17 @@ class TaskCreate(Task):
     creator_id: UUID = Field(None, exclude=True)
 
 
-class AddUserToTask(BaseModel):
-    task_id: UUID
-    user_id: Optional[UUID] = None
+class TaskCommentGet(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    content: str
+    created_at: datetime
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at: datetime):
+        if isinstance(created_at, datetime):
+            return created_at.strftime("%d-%m-%Y %H:%M:%S")
+        return created_at
 
 
 class TaskGet(Task):
@@ -56,6 +43,24 @@ class TaskGet(Task):
     created_at: datetime
     updated_at: datetime
 
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at: datetime):
+        if isinstance(created_at, datetime):
+            return created_at.strftime("%d-%m-%Y %H:%M:%S")
+        return created_at
+
+    @field_serializer("updated_at")
+    def serialize_updated_at(self, updated_at: datetime):
+        if isinstance(updated_at, datetime):
+            return updated_at.strftime("%d-%m-%Y %H:%M:%S")
+        return updated_at
+
+    @field_serializer("due_date")
+    def serialize_due_date(self, due_date: datetime):
+        if isinstance(due_date, datetime):
+            return due_date.strftime("%d-%m-%Y")
+        return due_date
+
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
@@ -63,3 +68,22 @@ class TaskUpdate(BaseModel):
     status: Optional[str] = None
     priority: Optional[str] = None
     due_date: Optional[datetime] = None
+
+
+class TaskComment(BaseModel):
+    content: str
+    user_id: UUID
+    task_id: UUID
+
+
+class TaskCommentCreate(TaskComment):
+    user_id: Optional[UUID] = None
+
+
+class TaskCommentUpdate(TaskComment):
+    ...
+
+
+class AddUserToTask(BaseModel):
+    task_id: UUID
+    user_id: Optional[UUID] = None

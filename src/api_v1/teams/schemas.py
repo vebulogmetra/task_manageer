@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 from src.api_v1.associates.schemas import WithUser
 
@@ -27,6 +27,12 @@ class TeamGet(Team):
     id: UUID
     users: Optional[list[WithUser]] = []
     created_at: datetime
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at: datetime):
+        if isinstance(created_at, datetime):
+            return created_at.strftime("%d-%m-%Y %H:%M:%S")
+        return created_at
 
 
 class TeamUpdate(BaseModel):

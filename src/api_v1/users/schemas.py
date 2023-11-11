@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer
 
 from src.api_v1.associates.schemas import WithProject, WithTask, WithTeam
 
@@ -45,10 +45,17 @@ class UserCreate(User):
 class UserGet(User):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
+    created_projects: Optional[list[WithProject]] = []
     projects: Optional[list[WithProject]] = []
     tasks: Optional[list[WithTask]] = []
     teams: Optional[list[WithTeam]] = []
     created_at: datetime
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at: datetime):
+        if isinstance(created_at, datetime):
+            return created_at.strftime("%d-%m-%Y %H:%M:%S")
+        return created_at
 
 
 class SignupGet(BaseModel):
