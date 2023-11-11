@@ -17,14 +17,9 @@ def get_index_page(request: Request):
         user = get_current_user_from_cookie(request)
     except EmptyAuthCookie:
         user = None
-    # context = {
-    #     "user": user,
-    #     "request": request,
-    # }
-    # return templates.TemplateResponse("home.html", context)
     if user:
         return RedirectResponse(
-            url=f"{settings.front_prefix}/home", status_code=status.HTTP_302_FOUND
+            url=f"{settings.front_prefix}/current_user", status_code=status.HTTP_302_FOUND
         )
     else:
         return RedirectResponse(
