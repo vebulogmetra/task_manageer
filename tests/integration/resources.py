@@ -13,6 +13,8 @@ base_api_url = settings.api_v1_prefix
 @dataclass
 class User:
     username: str
+    first_name: str
+    last_name: str
     email: EmailStr
     password: str
     id: str = None
@@ -23,7 +25,7 @@ class User:
 
 @dataclass
 class Project:
-    name: str
+    title: str
     description: str
     creator_id: str = None
     id: str = None
@@ -111,8 +113,9 @@ class Constant:
     # Project
     project_create_response_required_fields = (
         "id",
-        "name",
+        "title",
         "description",
+        "creator",
         "creator_id",
         "users",
         "created_at",
@@ -123,6 +126,8 @@ class Constant:
 test_user = User(
     **{
         "username": "fedor",
+        "first_name": "Fedor",
+        "last_name": "Jonson",
         "email": "f@f.f",
         "password": "qwerty",
     }
@@ -130,12 +135,14 @@ test_user = User(
 test_user_developer = User(
     **{
         "username": "oleg",
+        "first_name": "Oleg",
+        "last_name": "Frolov",
         "email": "o@o.o",
         "password": "qwerty123",
     }
 )
 test_project = Project(
-    **{"name": "myprj", "description": "very nice project"},
+    **{"title": "myprj", "description": "very nice project"},
 )
 test_task = Task(
     **{

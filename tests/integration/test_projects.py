@@ -110,12 +110,12 @@ def test_get_project(client: TestClient, access_token):
 
 def test_update_project(client: TestClient, access_token):
     auth_header = {"Authorization": f"bearer {access_token}"}
-    # Update project name
+    # Update project title
     response = client.put(
         test_api.project_update,
         params={"project_id": test_project.id},
         headers=auth_header,
-        json={"name": "HerberProject"},
+        json={"title": "HerberProject"},
     )
     assert response.status_code == test_status.success
 
@@ -126,7 +126,7 @@ def test_update_project(client: TestClient, access_token):
         headers=auth_header,
     )
     assert response.status_code == test_status.success
-    assert response.json()["name"] == "HerberProject"
+    assert response.json()["title"] == "HerberProject"
 
 
 def test_delete_project(client: TestClient, access_token):
