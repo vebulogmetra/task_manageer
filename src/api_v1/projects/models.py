@@ -34,6 +34,10 @@ class Project(Base):
         onupdate=sa.text("date_trunc('seconds', now()::timestamp)"),
     )
 
+    creator: sao.Mapped[User] = sao.relationship(
+        back_populates="created_projects", lazy="joined"
+    )
+
     users: sao.Mapped[list[User]] = sao.relationship(
         secondary="users_projects", back_populates="projects", lazy="joined"
     )
