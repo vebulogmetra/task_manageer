@@ -29,6 +29,7 @@ async def team_all_page(request: Request, session: AsyncSession = Depends(get_db
     if current_user:
         teams: list[Team] = await get_teams_handler(limit=10, offset=0, session=session)
     context = {
+        "logged_in": True,
         "teams": [TeamGet.model_validate(t) for t in teams],
         "request": request,
     }
@@ -51,6 +52,8 @@ async def team_page(
             team_id=team_id, session=session, current_user=current_user
         )
     context = {
+        "logged_in": True,
+        "single_team": True,
         "team": TeamGet.model_validate(team),
         "request": request,
     }

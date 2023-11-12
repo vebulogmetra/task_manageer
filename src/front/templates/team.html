@@ -4,6 +4,8 @@
 <link href="{{ url_for('static', path='/css/team_style.css') }}" rel="stylesheet">
 {% endblock %}
 
+{% block nav_teams %}active{% endblock %}
+
 {% block content %}
 
 {% if teams %}
@@ -17,9 +19,13 @@
       <hr>
       <p class="card-text">Assigned developers:</p>
       <ul class="text-reset list-unstyled d-flex flex-wrap">
-        {% for user in team.users %}
-        <li class="m-2"><a href="/front/pages/user/{{ user.id }}" class="btn btn-outline-info btn-sm" role="button" aria-pressed="true">{{ user.username }}</a></li>
-        {% endfor %}
+        {% if team.users %}
+          {% for user in team.users %}
+          <li class="m-2"><a href="/front/pages/user/{{ user.id }}" class="btn btn-outline-info btn-sm" role="button" aria-pressed="true">{{ user.username }}</a></li>
+          {% endfor %}
+        {% else %}
+          <li class="m-2"><span>No users &#128760;</span><a href="/front/pages/user/all" class="btn btn-outline-info btn-sm btn btn-floating m-1" role="button" aria-pressed="true"><i class="fas fa-plus"></i></a></li>
+        {% endif %}
       </ul>
       <hr>
       <a href="#" class="btn btn-dark" role="button" aria-pressed="true">Add developer</a>
@@ -30,7 +36,7 @@
 </div>
 {% endif %}
 
-{% if team %}
+{% if team and single_team %}
 <section class="mt-3" style="background-color: #eee;">
   <div class="container py-3">
     <h4>Team</h4>

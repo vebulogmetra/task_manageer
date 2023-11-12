@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block nav_home %}active{% endblock %}
+
 {% block content %}
 
 {% block title %}
@@ -19,7 +21,7 @@
     <h2>You are not logged in :(</h2>
     <p>
         Hello stranger. You are not logged. Please follow the link to
-        <a href="/front/pages/login" class="btn">login</a>!
+        <a href="/front/pages/login">login</a>!
     </p>
 {% endif %}
 {% endblock %}

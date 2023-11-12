@@ -36,6 +36,7 @@ async def signup_post(request: Request, session: AsyncSession = Depends(get_db))
                 "username": form.username,
                 "email": form.email,
                 "role": form.role,
+                "position": form.position,
                 "first_name": form.first_name,
                 "last_name": form.last_name,
                 "password": form.password,
@@ -93,11 +94,7 @@ async def login_for_access_token(
     response.set_cookie(
         key=settings.cookie_name_access,
         value=f"Bearer {tokens.access_token}",
-        httponly=True,
-    )
-    response.set_cookie(
-        key=f"Refresh_{settings.cookie_name_access}",
-        value=f"Bearer {tokens.refresh_token}",
+        expires=604800,
         httponly=True,
     )
     return {settings.cookie_name_access: tokens.access_token, "token_type": "bearer"}

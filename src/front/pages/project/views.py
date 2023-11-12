@@ -33,6 +33,7 @@ async def project_all_page(request: Request, session: AsyncSession = Depends(get
             session=session,
         )
     context = {
+        "logged_in": True,
         "projects": [ProjectGet.model_validate(p) for p in projects],
         "request": request,
     }
@@ -55,6 +56,8 @@ async def project_page(
             project_id=project_id, session=session, current_user=current_user
         )
     context = {
+        "logged_in": True,
+        "single_project": True,
         "project": ProjectGet.model_validate(project),
         "request": request,
     }

@@ -19,7 +19,7 @@ def get_index_page(request: Request):
         user = None
     if user:
         return RedirectResponse(
-            url=f"{settings.front_prefix}/current_user", status_code=status.HTTP_302_FOUND
+            url=f"{settings.front_prefix}/account", status_code=status.HTTP_302_FOUND
         )
     else:
         return RedirectResponse(
@@ -34,6 +34,7 @@ def get_home_page(request: Request):
     except EmptyAuthCookie:
         user = None
     context = {
+        "logged_in": True,
         "user": user,
         "request": request,
     }
