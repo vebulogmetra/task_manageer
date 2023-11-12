@@ -1,3 +1,4 @@
+import re
 import urllib.parse
 from typing import Optional
 
@@ -11,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.users.crud import check_exists_user
+from src.api_v1.users.schemas import AdminPositions
 from src.core.config import settings
 from src.utils.exceptions import custom_exc
 
@@ -80,6 +82,7 @@ class SignupForm:
         self.email: Optional[str] = None
         self.first_name: Optional[str] = None
         self.last_name: Optional[str] = None
+        self.position: Optional[str] = None
         self.role: Optional[str] = None
         self.password: Optional[str] = None
 
@@ -89,8 +92,25 @@ class SignupForm:
         self.email = form.get("email").lower()
         self.first_name = form.get("first_name").capitalize()
         self.last_name = form.get("last_name").capitalize()
-        self.role = form.get("role").lower()
+        self.position = form.get("position").lower()
+        self.role = self.select_user_role()
         self.password = form.get("password")
+
+    def slugify(self, string: str) -> str:
+        slugify_str = re.sub(r"\s+|\(|\)", "_", string)
+        slugify_str = re.sub(r"\W+", "", slugify_str)
+        if not re.match(r"^[a-zA-Z_]", slugify_str):
+            slugify_str = "_" + slugify_str
+        return slugify_str
+
+    def select_user_role(self) -> str:
+        self.position = self.slugify(string=self.position)
+        if self.position in list(
+            map(lambda x: x.value, AdminPositions._member_map_.values())
+        ):
+            return "admin"
+        else:
+            return "user"
 
     async def is_valid(self, db_session: AsyncSession):
         if not self.email or not (self.email.__contains__("@")):
@@ -113,6 +133,7 @@ class SignupForm:
             by_value=self.username,
         ):
             self.errors.append("This username is already registered")
+
         if not self.errors:
             return True
         return False

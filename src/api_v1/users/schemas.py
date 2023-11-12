@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer
 
 from src.api_v1.associates.schemas import WithProject, WithTask, WithTeam
+from src.core.config import settings
 
 
 class Roles(Enum):
@@ -20,13 +21,37 @@ class GetUserFields(Enum):
     email = "email"
 
 
+class Positions(Enum):
+    developer = "developer"
+    product_owner = "product_owner"
+    product_manager = "product_manager"
+    project_manager = "project_manager"
+    backend_developer = "backend_developer"
+    frontend_developer = "frontend_developer"
+    ios_developer = "ios_developer"
+    android_developer = "android_developer"
+    fullstack_developer = "fullstack_developer"
+    uxui_designer = "uxui_designer"
+    devops_engineer = "devops_engineer"
+    systems_analyst = "systems_analyst"
+    systems_architect = "systems_architect"
+    database_administrator = "database_administrator"
+    quality_assurance__qa_ = "quality_assurance__qa_"
+
+
+class AdminPositions(Enum):
+    product_owner = "product_owner"
+    product_manager = "product_manager"
+    project_manager = "project_manager"
+
+
 class User(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
     username: str
     email: EmailStr
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    position: str
+    position: Positions
     avatar_url: Optional[str] = None
     role: Roles
     is_active: bool
@@ -36,8 +61,8 @@ class User(BaseModel):
 class UserCreate(User):
     password: str
     role: Optional[Roles] = Roles.user
-    position: Optional[str] = "developer"
-    avatar_url: Optional[str] = "default.png"
+    position: Optional[str] = Positions.developer
+    avatar_url: Optional[str] = settings.default_avatar
     is_active: Optional[bool] = True
     is_verified: Optional[bool] = True
 
