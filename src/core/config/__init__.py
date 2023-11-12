@@ -35,6 +35,7 @@ class Config(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     front_prefix: str = "/front/pages"
     cookie_name_access: str = "access_token"
+    default_avatar: str = "default.png"
 
     db_host: str
     db_port: int

@@ -2,13 +2,14 @@ import secrets
 from pathlib import Path
 from uuid import UUID
 
-from sqlalchemy import delete, exists, select, update
+from sqlalchemy import delete, exists, func, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.base.utils import is_valid_uuid
 from src.api_v1.users.models import User
 from src.api_v1.users.schemas import GetUserFields, UserCreate, UserUpdate
+from src.core.config import settings
 from src.utils.auth import pwd_helper
 from src.utils.exceptions import custom_exc
 
@@ -48,8 +49,13 @@ async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     return user
 
 
-async def get_users(db_session: AsyncSession) -> list[User]:
-    stmt = select(User).order_by(User.created_at)
+async def get_total_users(db_session: AsyncSession) -> int:
+    total_users: int = await db_session.scalar(select(func.count(User.id)))
+    return total_users
+
+
+async def get_users(db_session: AsyncSession, limit: int, offset: int) -> list[User]:
+    stmt = select(User).limit(limit).offset(offset).order_by(User.created_at.desc())
 
     result: Result = await db_session.execute(stmt)
     users: list[User] | None = result.scalars().unique()
@@ -101,15 +107,16 @@ async def delete_user(db_session: AsyncSession, user_id: UUID) -> UUID:
     user: User = result.scalar()
     if user is None:
         raise custom_exc.not_found(entity_name=User.__name__)
-    try:
-        # :TODO Replace to settings root path
-        filepath = Path(f"src/front/static/profileimages/{user.avatar_url}")
-        if filepath.is_file():
-            filepath.unlink()
-        else:
-            print("File do not delete. Is not exists")
-    except Exception as e:
-        # :TODO Remove. Change to logger
-        print(f"Delete file error: {e}")
+    if user.avatar_url != settings.default_avatar:
+        try:
+            # :TODO Replace to settings root path
+            filepath = Path(f"src/front/static/profileimages/{user.avatar_url}")
+            if filepath.is_file():
+                filepath.unlink()
+            else:
+                print("File do not delete. Is not exists")
+        except Exception as e:
+            # :TODO Remove. Change to logger
+            print(f"Delete file error: {e}")
     await db_session.commit()
     return user_id

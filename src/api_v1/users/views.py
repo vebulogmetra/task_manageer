@@ -73,12 +73,20 @@ async def upload_avatar_picture(
     return StatusMsg(status="ok", detail=f"{secure_name} has been Successfully Uploaded")
 
 
+@router.get("/total_users")
+async def get_total_users_count_handler(session: AsyncSession = Depends(get_db)):
+    total_users: int = await crud.get_total_users(db_session=session)
+    return total_users
+
+
 @router.get("/users", response_model=list[UserGet])
 async def get_users_handler(
     session: AsyncSession = Depends(get_db),
+    limit: Optional[int] = 10,
+    offset: Optional[int] = 0,
     _: TokenUserData = Depends(get_current_user),
 ):
-    users = await crud.get_users(db_session=session)
+    users = await crud.get_users(db_session=session, limit=limit, offset=offset)
     return users
 
 
