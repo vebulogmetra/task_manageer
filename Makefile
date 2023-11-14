@@ -1,5 +1,6 @@
-drun:
-	docker run -p 8000:8000 --rm poetes
-
-dstop:
-	docker stop poetes
+d-build:
+	docker build -t task_mngr .
+d-start:
+	docker run -d -p 8000:8000 task_mngr
+d-stop:
+	docker stop task_mngr
