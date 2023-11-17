@@ -51,6 +51,7 @@ async def task_page(
         task: Task = await get_task_by_id_handler(
             task_id=task_id, session=session, current_user=current_user
         )
+
     context = {
         "logged_in": True,
         "single_task": True,

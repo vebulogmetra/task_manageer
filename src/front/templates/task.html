@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', path='/css/task_style.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block nav_tasks %}active{% endblock %}
+
+{% block content %}
+
+{% if tasks %}
+
+<section class="mt-3" style="background-color: #d1d1d1; border-radius: 10px;">
+  <div class="d-flex flex-wrap justify-content-center align-items-center pt-3 pb-3">
+{% for task in tasks %}
+    <div class="col col-md-9 col-lg-7 col-xl-5">
+      <div class="card mb-5" style="border-radius: 15px;">
+        <div class="card-body p-4">
+          <h3 class="mb-3">{{ task.title }}</h3>
+          <p class="small mb-0"><i class="far fa-star fa-lg"></i> <span class="mx-2">|</span> Created
+            at {{ task.created_at }}</p>
+          <hr class="my-4">
+          <span>{{ task.description }}</span>
+          <hr class="my-4">
+          <span>{{ task.priority }}</span>
+          <hr class="my-4">
+          <span>{{ task.status }}</span>
+          <hr class="my-4">
+          <span>{{ task.due_date }}</span>
+          <div class="d-flex pt-1">
+            <a href="/front/pages/task/{{ task.id }}" role="button" class="btn btn-outline-info me-1 flex-grow-1">View...</a>
+          </div>
+          <hr class="my-4">
+          <div class="d-flex justify-content-start align-items-center">
+            {% for user in task.users %}
+            <div class="rounded-circle overflow-hidden" style="width: 35px; height: 35px;">
+              <a href="/front/pages/user/{{ user.id }}">
+                <img src="{{ url_for('static', path='/profileimages/' + user.avatar_url) }}" alt="avatar"
+                  style="object-fit: cover; width: 100%; height: 100%;" width="35" height="35">
+              </a>
+            </div>
+            {% endfor %}
+            {% if not task.users %}
+            <span>No users &#128760;</span>
+            {% endif %}
+            <a href="/front/pages/user/all" class="btn btn-outline-dark btn-sm btn-floating m-1" role="button" aria-pressed="true">
+              <i class="fas fa-plus"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if task and single_task %}
+<div class="container py-5 h-100">
+  <div class="row d-flex justify-content-center align-items-center h-100">
+    <div class="col col-xl-10">
+      <div class="card mb-5" style="border-radius: 15px;">
+        <div class="card-body p-4">
+          <h3 class="mb-3">{{ task.title }}</h3>
+          <p class="small mb-0"><i class="far fa-star fa-lg"></i> <span class="mx-2">|</span> Created
+            at {{ task.created_at }}</p>
+          <hr class="my-4">
+          <span>{{ task.description }}</span>
+          <hr class="my-4">
+          <span>{{ task.priority }}</span>
+          <hr class="my-4">
+          <span>{{ task.status }}</span>
+          <hr class="my-4">
+          <span>{{ task.due_date }}</span>
+          <hr class="my-4">
+          <div class="d-flex justify-content-start align-items-center">
+            <p class="mb-0 text-uppercase mr-2"><i class="fas fa-link ms-4 me-2"></i> <span
+                class="text-muted small">Assigned developers: </span>
+            {% for user in task.users %}
+            <div class="rounded-circle overflow-hidden m-1" style="width: 70px; height: 70px;">
+              <a href="/front/pages/user/{{ user.id }}">
+                <img src="{{ url_for('static', path='/profileimages/' + user.avatar_url) }}" alt="avatar"
+                  style="object-fit: cover; width: 100%; height: 100%;" width="70" height="70">
+              </a>
+            </div>
+            {% endfor %}
+            <a href="/front/pages/user/all" class="btn btn-outline-dark btn-sm btn-floating m-1" role="button" aria-pressed="true">
+              <i class="fas fa-plus"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

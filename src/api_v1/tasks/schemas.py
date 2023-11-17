@@ -28,6 +28,8 @@ class TaskCommentGet(BaseModel):
     id: UUID
     content: str
     created_at: datetime
+    user_id: UUID
+    task_id: UUID
 
     @field_serializer("created_at")
     def serialize_created_at(self, created_at: datetime):
@@ -37,6 +39,7 @@ class TaskCommentGet(BaseModel):
 
 
 class TaskGet(Task):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     users: Optional[list[WithUser]] = []
     comments: Optional[list[TaskCommentGet]] = []
