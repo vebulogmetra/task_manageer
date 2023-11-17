@@ -20,6 +20,7 @@ python-multipart = "^0.0.6"
 pytz = "^2023.3.post1"
 sqladmin = {extras = ["full"], version = "^0.15.2"}
 werkzeug = "^3.0.1"
+loguru = "^0.7.2"
 
 
 [tool.poetry.group.dev.dependencies]

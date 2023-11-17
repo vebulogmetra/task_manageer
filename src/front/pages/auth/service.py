@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.users.crud import check_exists_user
 from src.api_v1.users.schemas import AdminPositions
-from src.core.config import settings
+from src.core.config import logger, settings
 from src.utils.exceptions import custom_exc
 
 
@@ -146,7 +146,8 @@ def get_current_user_from_cookie(request: Request) -> TokenUserData:
             token=token, key=settings.jwt_secret, algorithms=[settings.jwt_algorithm]
         )
     except JWTError:
-        raise custom_exc.unauthorized(detail="Bad token")
+        logger.warning(f"Bad token '{token}'")
+        return None
     except AttributeError:
         raise custom_exc.empty_auth_cookie()
     user_data = payload.get("user")

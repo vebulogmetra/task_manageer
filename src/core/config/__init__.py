@@ -1,9 +1,10 @@
 from os import path
 from pathlib import Path
 
+from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-__all__ = "settings"
+__all__ = "settings", "logger"
 
 SETTINGS_DIR: str = Path(__file__).parent
 
@@ -58,3 +59,11 @@ class Config(BaseSettings):
 
 
 settings = Config()
+
+# Настройки логирования
+logger.add(
+    path.join(Path(SETTINGS_DIR).parent, "logs/app.log"),
+    rotation="1 MB",
+    retention="7 days",
+    level="INFO",
+)
