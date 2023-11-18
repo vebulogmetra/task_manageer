@@ -17,16 +17,9 @@
       <div class="card mb-5" style="border-radius: 15px;">
         <div class="card-body p-4">
           <h3 class="mb-3">{{ task.title }}</h3>
-          <p class="small mb-0"><i class="far fa-star fa-lg"></i> <span class="mx-2">|</span> Created
+          <p class="small mb-0">Created
             at {{ task.created_at }}</p>
           <hr class="my-4">
-          <span>{{ task.description }}</span>
-          <hr class="my-4">
-          <span>{{ task.priority }}</span>
-          <hr class="my-4">
-          <span>{{ task.status }}</span>
-          <hr class="my-4">
-          <span>{{ task.due_date }}</span>
           <div class="d-flex pt-1">
             <a href="/front/pages/task/{{ task.id }}" role="button" class="btn btn-outline-info me-1 flex-grow-1">View...</a>
           </div>

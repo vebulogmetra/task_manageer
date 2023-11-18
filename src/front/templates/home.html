@@ -13,15 +13,11 @@
 
 {% if user %}
     <h2>You are logged in :)</h2>
-    <p>
-        Hi {{ user.username }}! You are logged in, so you can access the private 
-        page. <a href="/front/pages/home">here</a>!
-    </p>
+    <p>You can go to your account <a href="/front/pages/account">Account</a>!</p>
 {% else %}
     <h2>You are not logged in :(</h2>
     <p>
-        Hello stranger. You are not logged. Please follow the link to
-        <a href="/front/pages/login">login</a>!
+    Please follow the link to <a href="/front/pages/login">Login</a>!
     </p>
 {% endif %}
 {% endblock %}
