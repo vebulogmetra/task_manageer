@@ -91,3 +91,30 @@ class WithTeam(BaseModel):
         if isinstance(created_at, datetime):
             return created_at.strftime("%d-%m-%Y %H:%M:%S")
         return created_at
+
+
+class WithChat(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    created_at: datetime
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at: datetime):
+        if isinstance(created_at, datetime):
+            return created_at.strftime("%d-%m-%Y %H:%M:%S")
+        return created_at
+
+
+class WithMessage(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    sender_id: UUID
+    content: str
+    sender: WithUser
+    created_at: datetime
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at: datetime):
+        if isinstance(created_at, datetime):
+            return created_at.strftime("%d-%m-%Y %H:%M:%S")
+        return created_at

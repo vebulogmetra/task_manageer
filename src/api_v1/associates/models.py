@@ -80,3 +80,24 @@ class UserTeam(Base):
     team_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("teams.id", ondelete="CASCADE", onupdate="CASCADE")
     )
+
+
+class UserChat(Base):
+    __tablename__ = "users_chats"
+    __table_args__ = (
+        sa.UniqueConstraint(
+            "user_id",
+            "chat_id",
+            name="unique_users_chats",
+        ),
+    )
+
+    id: sao.Mapped[UUID] = sao.mapped_column(
+        primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")
+    )
+    user_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    chat_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("chats.id", ondelete="CASCADE", onupdate="CASCADE")
+    )

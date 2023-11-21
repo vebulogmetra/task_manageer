@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer
 
-from src.api_v1.associates.schemas import WithProject, WithTask, WithTeam
+from src.api_v1.associates.schemas import WithChat, WithProject, WithTask, WithTeam
 from src.core.config import settings
 
 
@@ -74,6 +74,7 @@ class UserGet(User):
     projects: Optional[list[WithProject]] = []
     tasks: Optional[list[WithTask]] = []
     teams: Optional[list[WithTeam]] = []
+    chats: Optional[list[WithChat]] = []
     created_at: datetime
 
     @field_serializer("created_at")
