@@ -14,10 +14,10 @@ templates = Jinja2Templates(directory="src/front/templates")
 @router.get("/", response_class=HTMLResponse)
 def get_index_page(request: Request):
     try:
-        user = get_current_user_from_cookie(request)
+        current_user = get_current_user_from_cookie(request)
     except EmptyAuthCookie:
-        user = None
-    if user:
+        current_user = None
+    if current_user:
         return RedirectResponse(
             url=f"{settings.front_prefix}/account", status_code=status.HTTP_302_FOUND
         )
@@ -30,12 +30,12 @@ def get_index_page(request: Request):
 @router.get("/home", response_class=HTMLResponse)
 def get_home_page(request: Request):
     try:
-        user = get_current_user_from_cookie(request)
+        current_user = get_current_user_from_cookie(request)
     except EmptyAuthCookie:
-        user = None
+        current_user = None
     context = {
-        "logged_in": True,
-        "user": user,
+        "logged_in": True if current_user else False,
+        "user": current_user,
         "request": request,
     }
     return templates.TemplateResponse("home.html", context)
