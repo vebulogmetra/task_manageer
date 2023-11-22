@@ -82,13 +82,13 @@ class UserTeam(Base):
     )
 
 
-class UserChat(Base):
-    __tablename__ = "users_chats"
+class UserDialog(Base):
+    __tablename__ = "users_dialogs"
     __table_args__ = (
         sa.UniqueConstraint(
             "user_id",
-            "chat_id",
-            name="unique_users_chats",
+            "dialog_id",
+            name="unique_users_dialogs",
         ),
     )
 
@@ -98,6 +98,6 @@ class UserChat(Base):
     user_id: sao.Mapped[UUID] = sao.mapped_column(
         sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    chat_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("chats.id", ondelete="CASCADE", onupdate="CASCADE")
+    dialog_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("dialogs.id", ondelete="CASCADE", onupdate="CASCADE")
     )

@@ -9,7 +9,6 @@ import sqlalchemy.orm as sao
 from src.api_v1.base.models import Base
 
 if TYPE_CHECKING:
-    from src.api_v1.chat.models import Chat
     from src.api_v1.projects.models import Project
     from src.api_v1.tasks.models import Task
     from src.api_v1.teams.models import Team
@@ -54,10 +53,6 @@ class User(Base):
 
     teams: sao.Mapped[list[Team]] = sao.relationship(
         secondary="users_teams", back_populates="users", lazy="joined"
-    )
-
-    chats: sao.Mapped[list[Chat]] = sao.relationship(
-        secondary="users_chats", back_populates="participants", lazy="joined"
     )
 
     def __str__(self) -> str:

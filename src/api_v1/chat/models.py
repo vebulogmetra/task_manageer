@@ -13,36 +13,32 @@ if TYPE_CHECKING:
     from src.api_v1.users.models import User
 
 
-class ChatMessage(Base):
-    chat_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("chats.id"))
+class Message(Base):
+    dialog_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("dialogs.id"))
     sender_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
     content: sao.Mapped[str] = sao.mapped_column(sa.String(120), nullable=True)
-    created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
+    send_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
 
-    sender: sao.Mapped[User] = sao.relationship()
+    sender: sao.Mapped[User] = sao.relationship("User", lazy="joined")
 
 
-class Chat(Base):
+class Dialog(Base):
     name: sao.Mapped[str] = sao.mapped_column(
-        sa.String(32),
-        server_default=sa.text(
-            "CONCAT('New chat ', substring(gen_random_uuid()::text, 1, 5))"
-        ),
-    )
+        sa.String(120), nullable=False
+    )  # username_username
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
 
-    participants: sao.Mapped[list[User]] = sao.relationship(
-        secondary="users_chats", back_populates="chats"
+    members: sao.Mapped[list[User]] = sao.relationship("User", secondary="users_dialogs")
+    messages: sao.Mapped[list[Message]] = sao.relationship(
+        "Message", order_by="Message.send_at"
     )
-
-    messages: sao.Mapped[list[ChatMessage]] = sao.relationship()
 
     def __str__(self):
-        return f"Chat {self.__table__.columns}"
+        return f"Dialog {self.__table__.columns}"
 
     def __repr__(self):
         return str(self)
