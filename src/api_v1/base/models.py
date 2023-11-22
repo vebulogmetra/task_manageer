@@ -15,3 +15,7 @@ class Base(DeclarativeBase):
     id: Mapped[UUID] = mapped_column(
         primary_key=True, server_default=func.gen_random_uuid()
     )
+
+    def as_dict(self):
+        """Sqlalchemy object to dict"""
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
