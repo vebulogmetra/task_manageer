@@ -19,7 +19,7 @@
       <div class="col col-md-9 col-lg-7 col-xl-5">
         <div class="card mb-5" style="border-radius: 15px;">
           <div class="card-body p-4">
-            <h3 class="mb-3">{{ dialog.name }}</h3>
+            <h3 class="mb-3">Dialog {{ dialog.creator.username }} - {{ dialog.interlocutor.username }}</h3>
             <p class="small mb-0">Created at {{ dialog.created_at }}</p>
             <hr class="my-4">
             <div class="d-flex pt-1">
@@ -27,17 +27,18 @@
             </div>
             <hr class="my-4">
             <div class="d-flex justify-content-start align-items-center">
-              {% for user in dialog.members %}
               <div class="rounded-circle overflow-hidden" style="width: 35px; height: 35px;">
-                <a href="/front/pages/user/{{ user.id }}">
-                  <img src="{{ url_for('static', path='/profileimages/' + user.avatar_url) }}" alt="avatar"
+                <a href="/front/pages/user/{{ dialog.creator.id }}">
+                  <img src="{{ url_for('static', path='/profileimages/' + dialog.creator.avatar_url) }}" alt="avatar"
                     style="object-fit: cover; width: 100%; height: 100%;" width="35" height="35">
                 </a>
               </div>
-              {% endfor %}
-              {% if not dialog.members %}
-              <span>No users &#128760;</span>
-              {% endif %}
+              <div class="rounded-circle overflow-hidden" style="width: 35px; height: 35px;">
+                <a href="/front/pages/user/{{ dialog.interlocutor.id }}">
+                  <img src="{{ url_for('static', path='/profileimages/' + dialog.interlocutor.avatar_url) }}" alt="avatar"
+                    style="object-fit: cover; width: 100%; height: 100%;" width="35" height="35">
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -52,8 +53,8 @@
     <div class="col-md-6 mt-3">
         <div class="card card-bordered">
             <div class="card-header">
-                <h4 class="card-title"><strong>{{ dialog.name }}</strong></h4>
-                <a class="btn btn-xs btn-secondary" href="#" data-abc="true">Let's Chat App</a>
+                <h4 class="card-title"><strong>Dialog {{ dialog.creator.username }} - {{ dialog.interlocutor.username }}</strong></h4>
+                <a class="btn btn-xs btn-secondary" href="#" data-abc="true">Delete dialog</a>
             </div>
 
             <div class="ps-container ps-theme-default ps-active-y" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
@@ -86,8 +87,8 @@
             </div>
             <div class="publisher bt-1 border-light">
                 <img class="avatar avatar-xs" src="{{ url_for('static', path='/profileimages/' + user.avatar_url) }}" alt="...">
-                <form action="" onsubmit="sendMessage(event)">
-                    <input id="messageText" autocomplete="off" class="publisher-input" type="text" placeholder="Type your message...">
+                <form style="width: 100%;" action="" onsubmit="sendMessage(event)">
+                    <input id="messageText" autocomplete="off" class="publisher-input" type="text" placeholder="Message...">
                     <button type="submit" class="publisher-btn text-info"><i class="fa fa-paper-plane"></i></button>
                 </form>
             </div>
@@ -98,7 +99,6 @@
 <script>
     var user_id = "{{ user.id }}";
     var dialog_id = "{{ dialog.id }}";
-    console.log(`user_id ${user_id} dialog_id ${dialog_id}`)
     var ws = new WebSocket(`ws://localhost:8000/api/v1/chat/ws/${dialog_id}/${user_id}`);
     ws.onmessage = function(event) {
         var messageBlock = document.createElement('div');
@@ -122,9 +122,10 @@
         mediaBody.appendChild(contentParagraph);
         mediaBody.appendChild(metaParagraph);
         messageBlock.appendChild(mediaBody);
-        
+
         var chatContainer = document.querySelector('#chat-content');
         chatContainer.appendChild(messageBlock);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
         };
 
     function sendMessage(event) {
