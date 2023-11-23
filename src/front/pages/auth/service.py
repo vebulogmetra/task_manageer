@@ -139,7 +139,7 @@ class SignupForm:
         return False
 
 
-def get_current_user_from_cookie(request: Request) -> TokenUserData:
+def get_current_user_from_cookie(request: Request) -> TokenUserData | None:
     try:
         token: str = request.cookies.get(settings.cookie_name_access).split(" ")[1]
         payload = jwt.decode(
