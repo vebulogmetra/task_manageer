@@ -97,25 +97,25 @@
 </div>
 
 <script>
-    var user_id = "{{ user.id }}";
-    var dialog_id = "{{ dialog.id }}";
-    var ws = new WebSocket(`ws://localhost:8000/api/v1/chat/ws/${dialog_id}/${user_id}`);
+    let user_id = "{{ user.id }}";
+    let dialog_id = "{{ dialog.id }}";
+    let ws = new WebSocket(`ws://localhost:8000/api/v1/chat/ws/${dialog_id}/${user_id}`);
     ws.onmessage = function(event) {
-        var messageBlock = document.createElement('div');
+        let messageBlock = document.createElement('div');
         messageBlock.classList.add('media', 'media-chat', 'media-chat-reverse');
 
-        var mediaBody = document.createElement('div');
+        let mediaBody = document.createElement('div');
         mediaBody.classList.add('media-body');
 
-        var contentParagraph = document.createElement('p');
-        var content = document.createTextNode(event.data);
+        let contentParagraph = document.createElement('p');
+        let content = document.createTextNode(event.data);
         contentParagraph.appendChild(content);
 
-        var metaParagraph = document.createElement('p');
+        let metaParagraph = document.createElement('p');
         metaParagraph.classList.add('meta');
 
-        var timeElement = document.createElement('time');
-        var formattedDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+        let timeElement = document.createElement('time');
+        let formattedDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
         timeElement.textContent = formattedDateTime;
 
         metaParagraph.appendChild(timeElement);
@@ -123,13 +123,13 @@
         mediaBody.appendChild(metaParagraph);
         messageBlock.appendChild(mediaBody);
 
-        var chatContainer = document.querySelector('#chat-content');
+        let chatContainer = document.querySelector('#chat-content');
         chatContainer.appendChild(messageBlock);
         chatContainer.scrollTop = chatContainer.scrollHeight;
         };
 
     function sendMessage(event) {
-        var input = document.getElementById("messageText");
+        let input = document.getElementById("messageText");
         ws.send(input.value);
         input.value = '';
         event.preventDefault();
