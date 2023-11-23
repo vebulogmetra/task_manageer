@@ -5,7 +5,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer
 
-from src.api_v1.associates.schemas import WithChat, WithProject, WithTask, WithTeam
 from src.core.config import settings
 
 
@@ -45,20 +44,14 @@ class AdminPositions(Enum):
     project_manager = "project_manager"
 
 
-class User(BaseModel):
-    model_config = ConfigDict(use_enum_values=True)
+class BaseUser(BaseModel):
     username: str
     email: EmailStr
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    position: Positions
-    avatar_url: Optional[str] = None
-    role: Roles
-    is_active: bool
-    is_verified: bool
 
 
-class UserCreate(User):
+class UserCreate(BaseUser):
     password: str
     role: Optional[Roles] = Roles.user
     position: Optional[str] = Positions.developer
@@ -67,14 +60,14 @@ class UserCreate(User):
     is_verified: Optional[bool] = True
 
 
-class UserGet(User):
+class UserGet(BaseUser):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    created_projects: Optional[list[WithProject]] = []
-    projects: Optional[list[WithProject]] = []
-    tasks: Optional[list[WithTask]] = []
-    teams: Optional[list[WithTeam]] = []
-    chats: Optional[list[WithChat]] = []
+    role: Roles
+    position: str
+    avatar_url: str
+    is_active: bool
+    is_verified: bool
     created_at: datetime
 
     @field_serializer("created_at")
@@ -82,6 +75,24 @@ class UserGet(User):
         if isinstance(created_at, datetime):
             return created_at.strftime("%d-%m-%Y %H:%M:%S")
         return created_at
+
+
+##### Попытка слепить динамическую модель для подгрузки joinedload ###### noqa
+
+# def create_dynamic_user_model(options: GetUserOptions) -> BaseModel:
+#     dynamic_fields = {}
+#     if options.include_created_projects:
+#         dynamic_fields['created_projects'] = Optional[list[str]]
+#     if options.include_projects:
+#         dynamic_fields['projects'] = Optional[list[str]]
+#     if options.include_tasks:
+#         dynamic_fields['tasks'] = Optional[list[str]]
+#     if options.include_teams:
+#         dynamic_fields['teams'] = Optional[list[str]]
+#     if options.include_dialogs:
+#         dynamic_fields['chats'] = Optional[list[str]]
+
+#     return create_model("DynamicUserModel", **dynamic_fields, __base__=BaseUser)
 
 
 class SignupGet(BaseModel):

@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.chat.schemas import DialogGet, MessageGet, WithUser
-from src.api_v1.chat.views import get_dialog_by_id_handler, get_dialogs_handler
+from src.api_v1.dialogs.schemas import DialogGet, MessageGet, WithUser
+from src.api_v1.dialogs.views import get_dialog_by_id_handler, get_dialogs_handler
 from src.api_v1.users.models import User
 from src.api_v1.users.schemas import GetUserFields
 from src.api_v1.users.views import get_user_handler

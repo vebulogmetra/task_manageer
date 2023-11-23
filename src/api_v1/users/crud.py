@@ -56,7 +56,6 @@ async def get_total_users(db_session: AsyncSession) -> int:
 
 async def get_users(db_session: AsyncSession, limit: int, offset: int) -> list[User]:
     stmt = select(User).limit(limit).offset(offset).order_by(User.created_at.desc())
-
     result: Result = await db_session.execute(stmt)
     users: list[User] | None = result.scalars().unique()
     if users is None:
@@ -71,6 +70,7 @@ async def get_user(db_session: AsyncSession, by_field: str, by_value: str) -> Us
             raise custom_exc.invalid_input(detail="user id must by valid type UUID4")
 
     stmt = select(User).where(getattr(User, by_field) == by_value)
+
     user: User | None = await db_session.scalar(stmt)
     if user is None:
         raise custom_exc.not_found(entity_name=User.__name__)

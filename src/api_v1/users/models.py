@@ -40,19 +40,19 @@ class User(Base):
     )
 
     created_projects: sao.Mapped[list[Project]] = sao.relationship(
-        back_populates="creator", lazy="joined"
+        back_populates="creator"
     )
 
     projects: sao.Mapped[list[Project]] = sao.relationship(
-        secondary="users_projects", back_populates="users", lazy="joined"
+        secondary="users_projects", back_populates="users"
     )
 
     tasks: sao.Mapped[list[Task]] = sao.relationship(
-        secondary="users_tasks", back_populates="users", lazy="joined"
+        secondary="users_tasks", back_populates="users"
     )
 
     teams: sao.Mapped[list[Team]] = sao.relationship(
-        secondary="users_teams", back_populates="users", lazy="joined"
+        secondary="users_teams", back_populates="users"
     )
 
     def __str__(self) -> str:
