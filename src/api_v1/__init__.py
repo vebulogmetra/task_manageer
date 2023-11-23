@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.api_v1.associates.models import UserDialog, UserProject, UserTask, UserTeam
+from src.api_v1.associates.models import UserProject, UserTask, UserTeam
 from src.api_v1.auth.views import router as auth_router
 from src.api_v1.base.models import Base
 from src.api_v1.chat.models import Dialog, Message
@@ -26,7 +26,6 @@ __all__ = (
     "UserTeam",
     "Dialog",
     "Message",
-    "UserDialog",
 )
 
 

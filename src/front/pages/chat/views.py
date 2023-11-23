@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.auth.schemas import TokenUserData
-from src.api_v1.chat.models import Dialog
+from src.api_v1.chat.schemas import DialogGet, MessageGet, WithUser
 from src.api_v1.chat.views import get_dialog_by_id_handler, get_dialogs_handler
 from src.api_v1.users.models import User
 from src.api_v1.users.schemas import GetUserFields
@@ -35,7 +35,7 @@ async def get_chat_page(request: Request, session: AsyncSession = Depends(get_db
             session=session,
             current_user=current_user,
         )
-        dialogs = await get_dialogs_handler(session=session)
+        dialogs = await get_dialogs_handler(limit=10, offset=0, session=session)
     context = {"request": request, "user": user, "dialogs": dialogs}
     return templates.TemplateResponse("chat.html", context)
 
@@ -50,7 +50,7 @@ async def get_dialog_by_id_page(
         return RedirectResponse(
             url=f"{settings.front_prefix}/login", status_code=status.HTTP_302_FOUND
         )
-    dialog: Dialog = await get_dialog_by_id_handler(
+    dialog: dict = await get_dialog_by_id_handler(
         dialog_id=dialog_id, session=session, current_user=current_user
     )
     user: User = await get_user_handler(
@@ -60,13 +60,19 @@ async def get_dialog_by_id_page(
         current_user=current_user,
     )
 
-    for msg in dialog.messages:
-        msg.is_sender = str(msg.sender_id) == str(user.id)
+    dialog_messages: list[dict] = dialog.get("messages", None)
+    if dialog_messages:
+        for msg in dialog_messages:
+            msg["is_sender"] = str(msg["sender_id"]) == str(user.id)
+            sender = msg.get("sender")
+            sender.pop("hashed_password", None)
+            sender = WithUser.model_validate(sender)
+            msg = MessageGet.model_validate(msg)
 
     context = {
         "logged_in": True if current_user else False,
         "user": user,
-        "dialog": dialog,
+        "dialog": DialogGet.model_validate(dialog),
         "request": request,
     }
     return templates.TemplateResponse("chat.html", context)

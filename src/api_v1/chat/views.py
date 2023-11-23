@@ -7,54 +7,73 @@ from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.chat import crud
-from src.api_v1.chat.schemas import AddUserToDialog, DialogCreate, MessageCreate
+from src.api_v1.chat.schemas import DialogCreate, MessageCreate
 from src.utils.database import get_db
 from src.utils.websocket import ws_manager
 
 router = APIRouter()
 
 
-# @router.post("/create", response_model=ChatGet)
 @router.post("/create")
 async def create_dialog_handler(
     dialog_data: DialogCreate,
     session: AsyncSession = Depends(get_db),
     current_user: TokenUserData = Depends(get_current_user),
 ):
+    if dialog_data.creator_id is None:
+        dialog_data.creator_id = current_user.id
+
     new_dialog = await crud.create_dialog(db_session=session, dialog_data=dialog_data)
-    # add creator to dialog memebers
-    data = AddUserToDialog(dialog_id=new_dialog.id, user_id=current_user.id)
-    await crud.add_user_to_dialog(db_session=session, data=data)
-    await session.refresh(new_dialog)
     return new_dialog
 
 
-@router.post("/add_user", response_model=StatusMsg)
-async def add_user_to_dialog_handler(
-    data: AddUserToDialog,
-    session: AsyncSession = Depends(get_db),
-    current_user: TokenUserData = Depends(get_current_user),
-):
-    if data.user_id is None:
-        data.user_id = current_user.id
-    await crud.add_user_to_dialog(db_session=session, data=data)
-    return StatusMsg(
-        status="ok",
-        detail=f"User {data.user_id} added in dialog {data.dialog_id}",
-    )
-
-
-# @router.get("/chats", response_model=list[ChatGet])
 @router.get("/dialogs")
 async def get_dialogs_handler(
-    limit: Optional[int] = 100,
+    limit: Optional[int] = 10,
     offset: Optional[int] = 0,
     session: AsyncSession = Depends(get_db),
 ):
     return await crud.get_dialogs(db_session=session, limit=limit, offset=offset)
 
 
-# @router.get("/chat", response_model=ChatGet)
+@router.get("/dialogs_by_creator")
+async def get_dialogs_by_creator_handler(
+    creator_id: Optional[str] = None,
+    limit: Optional[int] = 10,
+    offset: Optional[int] = 0,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
+):
+    if creator_id is None:
+        creator_id = current_user.id
+    return await crud.get_dialogs(
+        db_session=session,
+        limit=limit,
+        offset=offset,
+        by_field="creator_id",
+        by_value=creator_id,
+    )
+
+
+@router.get("/dialogs_by_interlocutor")
+async def get_dialogs_by_interlocutor_handler(
+    interlocutor_id: Optional[str] = None,
+    limit: Optional[int] = 10,
+    offset: Optional[int] = 0,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
+):
+    if interlocutor_id is None:
+        interlocutor_id = current_user.id
+    return await crud.get_dialogs(
+        db_session=session,
+        limit=limit,
+        offset=offset,
+        by_field="interlocutor_id",
+        by_value=interlocutor_id,
+    )
+
+
 @router.get("/dialog")
 async def get_dialog_by_id_handler(
     dialog_id: str,

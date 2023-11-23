@@ -14,11 +14,12 @@ class Message(BaseModel):
 
 
 class Dialog(BaseModel):
-    name: str
+    creator_id: UUID
+    interlocutor_id: UUID
 
 
 class DialogCreate(Dialog):
-    ...
+    creator_id: Optional[UUID] = None
 
 
 class MessageCreate(Message):
@@ -28,9 +29,11 @@ class MessageCreate(Message):
 class DialogGet(Dialog):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    members: Optional[list[WithUser]] = []
-    messages: Optional[list[Message]] = []
+    messages: Optional[list["MessageGet"]] = []
     created_at: datetime
+
+    creator: Optional[WithUser] = {}
+    interlocutor: Optional[WithUser] = {}
 
     @field_serializer("created_at")
     def serialize_created_at(self, created_at: datetime):
@@ -42,6 +45,7 @@ class DialogGet(Dialog):
 class MessageGet(Message):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
+    is_sender: Optional[bool] = None
     sender: WithUser
     send_at: datetime
 
@@ -50,8 +54,3 @@ class MessageGet(Message):
         if isinstance(send_at, datetime):
             return send_at.strftime("%d-%m-%Y %H:%M:%S")
         return send_at
-
-
-class AddUserToDialog(BaseModel):
-    dialog_id: UUID
-    user_id: Optional[UUID] = None

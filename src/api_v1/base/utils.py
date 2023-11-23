@@ -22,7 +22,8 @@ def is_valid_uuid(value: str, version: Optional[int] = 4) -> bool:
     >>> is_valid_uuid('c9bf9e58')
     False
     """
-
+    if isinstance(value, UUID):
+        return True
     try:
         uuid_obj = UUID(value, version=version)
     except ValueError:
