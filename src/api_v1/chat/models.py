@@ -21,20 +21,25 @@ class Message(Base):
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
 
-    sender: sao.Mapped[User] = sao.relationship("User", lazy="joined")
+    sender: sao.Mapped[User] = sao.relationship(
+        "User", foreign_keys=[sender_id], lazy="selectin"
+    )
 
 
 class Dialog(Base):
-    name: sao.Mapped[str] = sao.mapped_column(
-        sa.String(120), nullable=False
-    )  # username_username
+    creator_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
+    interlocutor_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
 
-    members: sao.Mapped[list[User]] = sao.relationship("User", secondary="users_dialogs")
     messages: sao.Mapped[list[Message]] = sao.relationship(
         "Message", order_by="Message.send_at"
+    )
+
+    creator: sao.Mapped[User] = sao.relationship("User", foreign_keys=[creator_id])
+    interlocutor: sao.Mapped[User] = sao.relationship(
+        "User", foreign_keys=[interlocutor_id]
     )
 
     def __str__(self):

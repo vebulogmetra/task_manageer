@@ -82,22 +82,22 @@ class UserTeam(Base):
     )
 
 
-class UserDialog(Base):
-    __tablename__ = "users_dialogs"
-    __table_args__ = (
-        sa.UniqueConstraint(
-            "user_id",
-            "dialog_id",
-            name="unique_users_dialogs",
-        ),
-    )
+# class UserDialog(Base):
+#     __tablename__ = "users_dialogs"
+#     __table_args__ = (
+#         sa.UniqueConstraint(
+#             "user_id",
+#             "dialog_id",
+#             name="unique_users_dialogs",
+#         ),
+#     )
 
-    id: sao.Mapped[UUID] = sao.mapped_column(
-        primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")
-    )
-    user_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
-    dialog_id: sao.Mapped[UUID] = sao.mapped_column(
-        sa.ForeignKey("dialogs.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
+#     id: sao.Mapped[UUID] = sao.mapped_column(
+#         primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")
+#     )
+#     user_id: sao.Mapped[UUID] = sao.mapped_column(
+#         sa.ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+#     )
+#     dialog_id: sao.Mapped[UUID] = sao.mapped_column(
+#         sa.ForeignKey("dialogs.id", ondelete="CASCADE", onupdate="CASCADE")
+#     )
