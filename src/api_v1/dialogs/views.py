@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
-from src.api_v1.chat import crud
-from src.api_v1.chat.schemas import DialogCreate, MessageCreate
+from src.api_v1.dialogs import crud
+from src.api_v1.dialogs.schemas import DialogCreate, DialogGet, MessageCreate
 from src.utils.database import get_db
 from src.utils.websocket import ws_manager
 
@@ -27,7 +27,7 @@ async def create_dialog_handler(
     return new_dialog
 
 
-@router.get("/dialogs")
+@router.get("/dialogs", response_model=list[DialogGet])
 async def get_dialogs_handler(
     limit: Optional[int] = 10,
     offset: Optional[int] = 0,

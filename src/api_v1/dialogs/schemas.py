@@ -26,6 +26,20 @@ class MessageCreate(Message):
     sender_id: Optional[UUID] = None
 
 
+class MessageGet(Message):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    is_sender: Optional[bool] = None
+    sender: WithUser
+    send_at: datetime
+
+    @field_serializer("send_at")
+    def serialize_send_at(self, send_at: datetime):
+        if isinstance(send_at, datetime):
+            return send_at.strftime("%d-%m-%Y %H:%M:%S")
+        return send_at
+
+
 class DialogGet(Dialog):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
@@ -40,17 +54,3 @@ class DialogGet(Dialog):
         if isinstance(created_at, datetime):
             return created_at.strftime("%d-%m-%Y %H:%M:%S")
         return created_at
-
-
-class MessageGet(Message):
-    model_config = ConfigDict(from_attributes=True)
-    id: UUID
-    is_sender: Optional[bool] = None
-    sender: WithUser
-    send_at: datetime
-
-    @field_serializer("send_at")
-    def serialize_send_at(self, send_at: datetime):
-        if isinstance(send_at, datetime):
-            return send_at.strftime("%d-%m-%Y %H:%M:%S")
-        return send_at

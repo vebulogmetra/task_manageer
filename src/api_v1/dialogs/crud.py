@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.api_v1.base.utils import is_valid_uuid
-from src.api_v1.chat.models import Dialog, Message
-from src.api_v1.chat.schemas import DialogCreate, MessageCreate
+from src.api_v1.dialogs.models import Dialog, Message
+from src.api_v1.dialogs.schemas import DialogCreate, MessageCreate
 from src.utils.exceptions import custom_exc
 
 
