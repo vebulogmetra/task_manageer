@@ -28,5 +28,11 @@ Task Manager - это инструмент для управления зада�
    make d-stop
 ```
 
+## Запуск тестов
+
+```shell
+   make d-run-tests
+```
+
 [Web UI](http://0.0.0.0:8000/front/pages/signup)
 [API Docs](http://0.0.0.0:8000/docs)
