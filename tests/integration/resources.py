@@ -15,6 +15,8 @@ class User:
     username: str
     first_name: str
     last_name: str
+    role: str
+    position: str
     email: EmailStr
     password: str
     id: str = None
@@ -60,6 +62,16 @@ class Team:
         return asdict(self)
 
 
+@dataclass
+class Chat:
+    creator_id: str = None
+    interlocutor_id: str = None
+    id: str = None
+
+    def to_dict(self):
+        return asdict(self)
+
+
 class Endpoint:
     # User
     user_create: str = os.path.join(base_api_url, "users/create")
@@ -92,6 +104,15 @@ class Endpoint:
     teams_get: str = os.path.join(base_api_url, "teams/teams")
     team_update: str = os.path.join(base_api_url, "teams/update")
     team_delete: str = os.path.join(base_api_url, "teams/delete")
+    # Chat
+    chat_create: str = os.path.join(base_api_url, "chat/create")
+    chat_get: str = os.path.join(base_api_url, "chat/dialog")
+    chats_by_creator_get: str = os.path.join(base_api_url, "chat/dialogs_by_creator")
+    chats_by_interlocutor_get: str = os.path.join(
+        base_api_url, "chat/dialogs_by_interlocutor"
+    )
+    chats_get: str = os.path.join(base_api_url, "chat/dialogs")
+    chat_add_message: str = os.path.join(base_api_url, "chat/add_message")
 
 
 class HttpStatus:
@@ -128,6 +149,8 @@ test_user = User(
         "username": "fedor",
         "first_name": "Fedor",
         "last_name": "Jonson",
+        "role": "admin",
+        "position": "product_owner",
         "email": "f@f.f",
         "password": "qwerty",
     }
@@ -137,6 +160,8 @@ test_user_developer = User(
         "username": "oleg",
         "first_name": "Oleg",
         "last_name": "Frolov",
+        "role": "user",
+        "position": "developer",
         "email": "o@o.o",
         "password": "qwerty123",
     }
@@ -154,6 +179,7 @@ test_task = Task(
     }
 )
 test_team = Team(**{"title": "Dream team", "description": "Your dream team"})
+test_chat = Chat()
 
 test_api = Endpoint()
 test_status = HttpStatus()

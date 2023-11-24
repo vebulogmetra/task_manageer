@@ -52,6 +52,7 @@ class BaseUser(BaseModel):
 
 
 class UserCreate(BaseUser):
+    model_config = ConfigDict(use_enum_values=True)
     password: str
     role: Optional[Roles] = Roles.user
     position: Optional[str] = Positions.developer
