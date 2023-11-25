@@ -1,33 +1,10 @@
 ## My files ##
 TODO.txt
+src/core/config/*.json
 src/tests
-src/front/static
+src/front/static/profileimages/*
+!src/front/static/profileimages/default.png
 .idea
-
-### Front ###
-frontend/.DS_Store
-frontend/node_modules
-frontend/dist
-
-
-# local env files
-frontend/.env.local
-frontend/.env.*.local
-
-# Log files
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-frontend/pnpm-debug.log*
-
-# Editor directories and files
-frontend/.idea
-frontend/.vscode
-frontend/*.suo
-frontend/*.ntvs*
-frontend/*.njsproj
-frontend/*.sln
-frontend/*.sw?
 
 
 ### Python ###

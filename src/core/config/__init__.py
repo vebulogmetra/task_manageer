@@ -37,6 +37,12 @@ class Config(BaseSettings):
     front_prefix: str = "/front/pages"
     cookie_name_access: str = "access_token"
     default_avatar: str = "default.png"
+    google_auth_scopes: list[str] = [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "openid",
+    ]
+    google_auth_redirect_url: str = "http://127.0.0.1:8000/front/pages/google_callback"
 
     db_host: str
     db_port: int
@@ -56,6 +62,15 @@ class Config(BaseSettings):
     jwt_algorithm: str
     jwt_refresh_expire_min: int
     jwt_access_expire_min: int
+
+    google_auth_client_id: str
+    google_auth_client_secret: str
+    session_secret: str
+
+    smtp_host: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
 
 
 settings = Config()
