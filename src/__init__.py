@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from src.api_v1 import main_router as v1_router
 from src.core.config import settings
@@ -28,6 +29,10 @@ def init_app(init_db=True) -> FastAPI:  # noqa: C901
         title=settings.app_title,
         version=settings.app_version,
         lifespan=lifespan,
+    )
+
+    server_app.add_middleware(
+        middleware_class=SessionMiddleware, secret_key=settings.session_secret
     )
 
     server_app.mount("/static", StaticFiles(directory="src/front/static"), name="static")
