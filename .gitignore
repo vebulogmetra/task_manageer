@@ -5,6 +5,7 @@ src/tests
 src/front/static/profileimages/*
 !src/front/static/profileimages/default.png
 .idea
+.vscode
 
 
 ### Python ###
