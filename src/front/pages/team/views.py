@@ -1,19 +1,17 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.teams.models import Team
 from src.api_v1.teams.schemas import TeamGet
 from src.api_v1.teams.views import get_team_handler, get_teams_handler
+from src.core.config import html_templates
 from src.front.helpers import auth as auth_helper
 from src.front.helpers.responses import redirect_to_login
 from src.front.helpers.schemas import AuthResponse
 from src.utils.database import get_db
 
 router = APIRouter()
-
-templates = Jinja2Templates(directory="src/front/templates")
 
 
 @router.get("/team/all", response_class=HTMLResponse)
@@ -27,7 +25,7 @@ async def team_all_page(request: Request, session: AsyncSession = Depends(get_db
             "teams": [TeamGet.model_validate(t) for t in teams],
             "request": request,
         }
-        response = templates.TemplateResponse("team.html", context)
+        response = html_templates.TemplateResponse("team.html", context)
     return response
 
 
@@ -47,5 +45,5 @@ async def team_page(
             "team": TeamGet.model_validate(team),
             "request": request,
         }
-        response = templates.TemplateResponse("team.html", context)
+        response = html_templates.TemplateResponse("team.html", context)
     return response

@@ -1,15 +1,12 @@
 from fastapi import APIRouter, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 
-from src.core.config import settings
+from src.core.config import html_templates, settings
 from src.front.helpers import auth as auth_helper
 from src.front.helpers.responses import redirect_to_login
 from src.front.helpers.schemas import AuthResponse
 
 router = APIRouter()
-
-templates = Jinja2Templates(directory="src/front/templates")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -33,5 +30,5 @@ def get_home_page(request: Request):
             "user": auth_data.current_user,
             "request": request,
         }
-        response = templates.TemplateResponse("home.html", context)
+        response = html_templates.TemplateResponse("home.html", context)
     return response

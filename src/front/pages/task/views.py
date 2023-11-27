@@ -1,19 +1,17 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.tasks.models import Task
 from src.api_v1.tasks.schemas import TaskGet
 from src.api_v1.tasks.views import get_task_by_id_handler, get_tasks_handler
+from src.core.config import html_templates
 from src.front.helpers import auth as auth_helper
 from src.front.helpers.responses import redirect_to_login
 from src.front.helpers.schemas import AuthResponse
 from src.utils.database import get_db
 
 router = APIRouter()
-
-templates = Jinja2Templates(directory="src/front/templates")
 
 
 @router.get("/task/all", response_class=HTMLResponse)
@@ -27,7 +25,7 @@ async def task_all_page(request: Request, session: AsyncSession = Depends(get_db
             "tasks": [TaskGet.model_validate(t) for t in tasks],
             "request": request,
         }
-        response = templates.TemplateResponse("task.html", context)
+        response = html_templates.TemplateResponse("task.html", context)
     return response
 
 
@@ -48,5 +46,5 @@ async def task_page(
             "task": TaskGet.model_validate(task),
             "request": request,
         }
-        response = templates.TemplateResponse("task.html", context)
+        response = html_templates.TemplateResponse("task.html", context)
     return response

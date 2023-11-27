@@ -1,19 +1,17 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.projects.models import Project
 from src.api_v1.projects.schemas import ProjectGet
 from src.api_v1.projects.views import get_project_by_id_handler, get_projects_handler
+from src.core.config import html_templates
 from src.front.helpers import auth as auth_helper
 from src.front.helpers.responses import redirect_to_login
 from src.front.helpers.schemas import AuthResponse
 from src.utils.database import get_db
 
 router = APIRouter()
-
-templates = Jinja2Templates(directory="src/front/templates")
 
 
 @router.get("/project/all", response_class=HTMLResponse)
@@ -31,7 +29,7 @@ async def project_all_page(request: Request, session: AsyncSession = Depends(get
             "projects": [ProjectGet.model_validate(p) for p in projects],
             "request": request,
         }
-        response = templates.TemplateResponse("project.html", context)
+        response = html_templates.TemplateResponse("project.html", context)
     return response
 
 
@@ -51,5 +49,5 @@ async def project_page(
             "project": ProjectGet.model_validate(project),
             "request": request,
         }
-        response = templates.TemplateResponse("project.html", context)
+        response = html_templates.TemplateResponse("project.html", context)
     return response
