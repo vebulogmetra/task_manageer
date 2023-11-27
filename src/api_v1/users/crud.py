@@ -40,6 +40,10 @@ def after_signup_user():
 
 async def create_user(db_session: AsyncSession, user_data: UserCreate) -> User:
     user_data: dict = user_data.model_dump()
+    if not isinstance(user_data.get("position"), str):
+        user_data["position"] = user_data["position"].value
+    if not isinstance(user_data.get("role"), str):
+        user_data["role"] = user_data["role"].value
     pwd_hash: str = pwd_helper.get_password_hash(password=user_data.pop("password", None))
     user_data.update({"hashed_password": pwd_hash})
     user = User(**user_data)
@@ -68,7 +72,7 @@ async def get_user(db_session: AsyncSession, by_field: str, by_value: str) -> Us
         is_uuid: bool = is_valid_uuid(value=by_value)
         if is_uuid is False:
             raise custom_exc.invalid_input(detail="user id must by valid type UUID4")
-
+    print(f"GET USER f={by_field}, v={by_value}")
     stmt = select(User).where(getattr(User, by_field) == by_value)
 
     user: User | None = await db_session.scalar(stmt)

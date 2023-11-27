@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.dialogs.schemas import DialogGet, MessageGet, WithUser
@@ -8,14 +7,13 @@ from src.api_v1.dialogs.views import get_dialog_by_id_handler, get_dialogs_handl
 from src.api_v1.users.models import User
 from src.api_v1.users.schemas import GetUserFields
 from src.api_v1.users.views import get_user_handler
+from src.core.config import html_templates
 from src.front.helpers import auth as auth_helper
 from src.front.helpers.responses import redirect_to_login
 from src.front.helpers.schemas import AuthResponse
 from src.utils.database import get_db
 
 router = APIRouter()
-
-templates = Jinja2Templates(directory="src/front/templates")
 
 
 @router.get("/chat", response_class=HTMLResponse)
@@ -31,7 +29,7 @@ async def get_chat_page(request: Request, session: AsyncSession = Depends(get_db
         )
         dialogs = await get_dialogs_handler(limit=10, offset=0, session=session)
         context = {"request": request, "user": user, "dialogs": dialogs}
-        response = templates.TemplateResponse("chat.html", context)
+        response = html_templates.TemplateResponse("chat.html", context)
     return response
 
 
@@ -67,5 +65,5 @@ async def get_dialog_by_id_page(
             "dialog": DialogGet.model_validate(dialog),
             "request": request,
         }
-        response = templates.TemplateResponse("chat.html", context)
+        response = html_templates.TemplateResponse("chat.html", context)
     return response

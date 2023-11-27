@@ -35,7 +35,9 @@ def init_app(init_db=True) -> FastAPI:  # noqa: C901
         middleware_class=SessionMiddleware, secret_key=settings.session_secret
     )
 
-    server_app.mount("/static", StaticFiles(directory="src/front/static"), name="static")
+    server_app.mount(
+        "/static", StaticFiles(directory=settings.html_staticfiles_path), name="static"
+    )
 
     server_app.include_router(
         router=v1_router,

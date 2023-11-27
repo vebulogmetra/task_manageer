@@ -26,6 +26,7 @@ class PwdHelper:
 
 pwd_helper: PwdHelper = PwdHelper()
 
+# By email auth backend
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=urllib.parse.urljoin(f"{settings.api_v1_prefix}/", "auth/login")
 )

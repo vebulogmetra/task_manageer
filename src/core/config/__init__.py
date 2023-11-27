@@ -1,6 +1,7 @@
 from os import path
 from pathlib import Path
 
+from fastapi.templating import Jinja2Templates
 from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -37,12 +38,8 @@ class Config(BaseSettings):
     front_prefix: str = "/front/pages"
     cookie_name_access: str = "access_token"
     default_avatar: str = "default.png"
-    google_auth_scopes: list[str] = [
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "openid",
-    ]
-    google_auth_redirect_url: str = "http://127.0.0.1:8000/front/pages/google_callback"
+    html_staticfiles_path: str = "src/front/static"
+    html_templates_path: str = "src/front/templates"
 
     db_host: str
     db_port: int
@@ -63,8 +60,19 @@ class Config(BaseSettings):
     jwt_refresh_expire_min: int
     jwt_access_expire_min: int
 
+    google_auth_grant_type: str = "authorization_code"
     google_auth_client_id: str
     google_auth_client_secret: str
+    google_auth_conf_url: str
+    google_auth_scopes: list[str] = [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "openid",
+    ]
+    google_auth_redirect_url: str = "http://127.0.0.1:8000/api/v1/auth/google/callback"
+    google_auth_base_url: str = "https://accounts.google.com/o/oauth2/auth"
+    google_auth_get_id_token_url: str = "https://oauth2.googleapis.com/token"
+
     session_secret: str
 
     smtp_host: str
@@ -74,6 +82,8 @@ class Config(BaseSettings):
 
 
 settings = Config()
+
+html_templates = Jinja2Templates(directory=settings.html_templates_path)
 
 # Настройки логирования
 logger.add(
