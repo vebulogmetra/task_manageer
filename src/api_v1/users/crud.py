@@ -72,7 +72,6 @@ async def get_user(db_session: AsyncSession, by_field: str, by_value: str) -> Us
         is_uuid: bool = is_valid_uuid(value=by_value)
         if is_uuid is False:
             raise custom_exc.invalid_input(detail="user id must by valid type UUID4")
-    print(f"GET USER f={by_field}, v={by_value}")
     stmt = select(User).where(getattr(User, by_field) == by_value)
 
     user: User | None = await db_session.scalar(stmt)

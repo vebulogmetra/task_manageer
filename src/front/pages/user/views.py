@@ -19,7 +19,9 @@ router = APIRouter()
 
 
 @router.get("/account")
-async def get_current_user_id(request: Request, session: AsyncSession = Depends(get_db)):
+async def show_user_accont_page(
+    request: Request, session: AsyncSession = Depends(get_db)
+):
     response = redirect_to_login
     auth_data: AuthResponse = auth_helper.check_login(request=request)
     if auth_data.is_auth_passed and auth_data.current_user:
@@ -36,7 +38,7 @@ async def get_current_user_id(request: Request, session: AsyncSession = Depends(
 
 
 @router.get("/user/all", response_class=HTMLResponse)
-async def user_all_page(
+async def show_users_page(
     request: Request,
     page: int = 1,
     items: int = 4,
@@ -67,7 +69,7 @@ async def user_all_page(
 
 
 @router.get("/user/{user_id}", response_class=HTMLResponse)
-async def user_page(
+async def show_user_page(
     request: Request, user_id: str, session: AsyncSession = Depends(get_db)
 ):
     response = redirect_to_login

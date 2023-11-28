@@ -1,9 +1,10 @@
+import os
 import secrets
 import shutil
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.utils import secure_filename
 
@@ -18,6 +19,7 @@ from src.api_v1.users.schemas import (
     UserGet,
     UserUpdate,
 )
+from src.core.config import settings
 from src.utils.database import get_db
 
 router = APIRouter()
@@ -42,26 +44,27 @@ async def create_user_handler(
 
 
 @router.post(
-    "/upload_picture", summary="Upload Profile picture", response_model=StatusMsg
+    "/upload_picture",
+    summary="Upload Profile picture",
+    response_model=StatusMsg,
 )
 async def upload_avatar_picture(
-    user_id: Optional[str] = None,
+    user_id: str = Form(...),
     picture: UploadFile = File(...),
     session: AsyncSession = Depends(get_db),
-    current_user: TokenUserData = Depends(get_current_user),
+    # current_user: TokenUserData = Depends(get_current_user),
 ):
     # :TODO Resize images
-    if user_id is None:
-        user_id = current_user.id
+    # :TODO if picture.content_type == "image/jpeg"
 
-    # if picture.content_type == "image/jpeg"
-
-    secure_name = secure_filename(picture.filename)
+    secure_name: str = secure_filename(picture.filename)
     name, ext = secure_name.split(".")
-    randon_hash = secrets.token_urlsafe(8)
-    picture_filename = f"{name}_{randon_hash}.{ext}"
-    # :TODO Replace to settings root path
-    with open(f"src/front/static/profileimages/{picture_filename}", "wb") as buffer:
+    random_hash: str = secrets.token_urlsafe(8)
+    picture_filename: str = f"{name}_{random_hash}.{ext}"
+    with open(
+        os.path.join(settings.html_staticfiles_path, "profileimages", picture_filename),
+        "wb",
+    ) as buffer:
         shutil.copyfileobj(picture.file, buffer)
 
     await crud.update_user(
@@ -69,8 +72,10 @@ async def upload_avatar_picture(
         user_id=user_id,
         update_data=UserUpdate(avatar_url=picture_filename),
     )
-
-    return StatusMsg(status="ok", detail=f"{secure_name} has been Successfully Uploaded")
+    response = StatusMsg(
+        status="ok", detail=f"{secure_name} has been Successfully Uploaded"
+    )
+    return response
 
 
 @router.get("/total_users")
