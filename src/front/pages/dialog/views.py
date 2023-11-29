@@ -3,7 +3,11 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.dialogs.schemas import DialogGet, MessageGet, WithUser
-from src.api_v1.dialogs.views import get_dialog_by_id_handler, get_dialogs_handler
+from src.api_v1.dialogs.views import (
+    get_dialog_by_id_handler,
+    get_dialogs_by_member_handler,
+    get_dialogs_handler,
+)
 from src.api_v1.users.models import User
 from src.api_v1.users.schemas import GetUserFields
 from src.api_v1.users.views import get_user_handler
@@ -14,6 +18,25 @@ from src.front.helpers.schemas import AuthResponse
 from src.utils.database import get_db
 
 router = APIRouter()
+
+
+@router.get("/dialogs")
+async def show_dialogs_page(request: Request, session: AsyncSession = Depends(get_db)):
+    response = redirect_to_login
+    auth_data: AuthResponse = auth_helper.check_login(request=request)
+    if auth_data.is_auth_passed and auth_data.current_user:
+        user: User = await get_user_handler(
+            by_field=GetUserFields.id,
+            by_value=str(auth_data.current_user.id),
+            session=session,
+            current_user=auth_data.current_user,
+        )
+        dialogs = await get_dialogs_by_member_handler(
+            limit=10, offset=0, session=session, current_user=auth_data.current_user
+        )
+        context = {"request": request, "user": user, "dialogs": dialogs}
+        response = html_templates.TemplateResponse("dialogs.html", context=context)
+    return response
 
 
 @router.get("/chat", response_class=HTMLResponse)
