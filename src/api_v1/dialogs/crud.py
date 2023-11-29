@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -49,6 +49,42 @@ async def get_dialogs(
 
     if by_field and by_value:
         query = query.where(getattr(Dialog, by_field) == by_value)
+
+    result = await db_session.execute(query)
+    dialogs = result.scalars().unique()
+    if not dialogs:
+        raise custom_exc.not_found(entity_name=f"{Dialog.__name__}s")
+    dialogs_clean = []
+    for d in dialogs:
+        dialog_dict: dict = jsonable_encoder(d)
+        dialog_creator: dict = dialog_dict.get("creator", None)
+        if dialog_creator:
+            _ = dialog_creator.pop("hashed_password")
+        dialogs_clean.append(dialog_dict)
+    return dialogs_clean
+
+
+async def get_dialogs_by_member(
+    db_session: AsyncSession, limit: int, offset: int, member_id: UUID
+) -> list[Dialog]:
+    is_uuid: bool = is_valid_uuid(value=member_id)
+    if is_uuid is False:
+        raise custom_exc.invalid_input(detail="member id must by valid type UUID4")
+
+    query = (
+        select(Dialog)
+        .options(
+            selectinload(Dialog.creator),
+            selectinload(Dialog.interlocutor),
+            selectinload(Dialog.messages),
+        )
+        .limit(limit)
+        .offset(offset)
+        .order_by(Dialog.created_at)
+    )
+    query = query.where(
+        or_(Dialog.creator_id == member_id, Dialog.interlocutor_id == member_id)
+    )
 
     result = await db_session.execute(query)
     dialogs = result.scalars().unique()

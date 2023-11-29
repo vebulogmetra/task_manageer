@@ -74,6 +74,21 @@ async def get_dialogs_by_interlocutor_handler(
     )
 
 
+@router.get("/dialogs_by_member")
+async def get_dialogs_by_member_handler(
+    member_id: Optional[str] = None,
+    limit: Optional[int] = 10,
+    offset: Optional[int] = 0,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
+):
+    if member_id is None:
+        member_id = current_user.id
+    return await crud.get_dialogs_by_member(
+        db_session=session, limit=limit, offset=offset, member_id=member_id
+    )
+
+
 @router.get("/dialog")
 async def get_dialog_by_id_handler(
     dialog_id: str,
@@ -120,4 +135,4 @@ async def websocket_endpoint(
             await crud.add_message(db_session=session, message_data=message_data)
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
-        await ws_manager.broadcast(f"Client #{user_id} left the chat")
+        await ws_manager.broadcast(f"Client #{user_id} left the dialog")
