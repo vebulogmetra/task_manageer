@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 
 class Message(Base):
     dialog_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("dialogs.id"))
-    sender_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
+    sender_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE")
+    )
     content: sao.Mapped[str] = sao.mapped_column(sa.String(120), nullable=True)
     send_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
@@ -27,8 +29,12 @@ class Message(Base):
 
 
 class Dialog(Base):
-    creator_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
-    interlocutor_id: sao.Mapped[UUID] = sao.mapped_column(sa.ForeignKey("users.id"))
+    creator_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE")
+    )
+    interlocutor_id: sao.Mapped[UUID] = sao.mapped_column(
+        sa.ForeignKey("users.id", ondelete="CASCADE")
+    )
     created_at: sao.Mapped[datetime.datetime] = sao.mapped_column(
         server_default=sa.text("date_trunc('seconds', now()::timestamp)")
     )
