@@ -40,7 +40,7 @@ class Dialog(Base):
     )
 
     messages: sao.Mapped[list[Message]] = sao.relationship(
-        "Message", order_by="Message.send_at"
+        "Message", order_by="Message.send_at.desc()"
     )
 
     creator: sao.Mapped[User] = sao.relationship("User", foreign_keys=[creator_id])
