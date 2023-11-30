@@ -54,7 +54,7 @@
                 <div class="media"><img src="{{ url_for('static', path='/profileimages/' + dialog.messages[0].sender.avatar_url) }}" alt="user" width="50" class="rounded-circle">
                   <div class="media-body ml-4">
                     <div class="d-flex align-items-center justify-content-between mb-1">
-                      <h6 class="mb-0">{{ dialog.messages[0].sender.first_name }} {{ dialog.messages[0].sender.last_name }}</h6><small class="small font-weight-bold">14 Dec</small>
+                      <h6 class="mb-0">{{ dialog.messages[0].sender.first_name }} {{ dialog.messages[0].sender.last_name }}</h6><small class="small font-weight-bold">{{ dialog.messages[0].send_at.strftime('%d %b %Y') }}</small>
                     </div>
                     <p class="font-italic text-muted mb-0 text-small">{{ dialog.messages[0].content }}</p>
                   </div>
