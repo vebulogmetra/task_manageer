@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +11,7 @@ from src.api_v1.tasks.schemas import (
     AddUserToTask,
     TaskCommentCreate,
     TaskCreate,
+    TaskGet,
     TaskUpdate,
 )
 from src.utils.exceptions import custom_exc
@@ -36,14 +37,21 @@ async def add_comment_to_task(db_session: AsyncSession, comment_data: TaskCommen
     await db_session.commit()
 
 
-async def get_tasks(db_session: AsyncSession, limit: int, offset: int) -> list[Task]:
-    stmt = select(Task).limit(limit).offset(offset).order_by(Task.created_at)
+async def get_total_tasks(db_session: AsyncSession) -> int:
+    total_tasks: int = await db_session.scalar(select(func.count(Task.id)))
+    return total_tasks
 
+
+async def get_tasks(db_session: AsyncSession, limit: int, offset: int) -> list[TaskGet]:
+    stmt = select(Task).limit(limit).offset(offset).order_by(Task.created_at)
     result: Result = await db_session.execute(stmt)
     tasks: list[Task] = result.scalars().unique()
     if tasks is None:
         raise custom_exc.not_found(entity_name=Task.__name__)
-    return list(tasks)
+    tasks_dto: list[TaskGet] = [
+        TaskGet.model_validate(t, from_attributes=True) for t in tasks
+    ]
+    return tasks_dto
 
 
 async def get_tasks_by_owner(db_session: AsyncSession, owner_id: UUID) -> list[Task]:

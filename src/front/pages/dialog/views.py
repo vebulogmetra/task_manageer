@@ -34,6 +34,7 @@ async def show_dialogs_page(request: Request, session: AsyncSession = Depends(ge
         dialogs = await get_dialogs_by_member_handler(
             limit=10, offset=0, session=session, current_user=auth_data.current_user
         )
+        dialogs = [DialogGet.model_validate(d) for d in dialogs]
         context = {"request": request, "user": user, "dialogs": dialogs}
         response = html_templates.TemplateResponse("dialogs.html", context=context)
     return response

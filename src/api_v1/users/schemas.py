@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
 from typing import Optional
@@ -5,6 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer
 
+from src.api_v1.tasks.schemas import TaskGet
 from src.core.config import settings
 
 
@@ -62,10 +65,10 @@ class UserCreate(BaseUser):
 
 
 class UserGet(BaseUser):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
     id: UUID
     role: Roles
-    position: str
+    position: Positions
     avatar_url: str
     is_active: bool
     is_verified: bool
@@ -76,6 +79,10 @@ class UserGet(BaseUser):
         if isinstance(created_at, datetime):
             return created_at.strftime("%d-%m-%Y %H:%M:%S")
         return created_at
+
+
+class UserGetRelTasks(UserGet):
+    tasks: "TaskGet"
 
 
 ##### Попытка слепить динамическую модель для подгрузки joinedload ###### noqa

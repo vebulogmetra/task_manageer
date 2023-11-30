@@ -17,6 +17,7 @@ from src.api_v1.users.schemas import (
     SignupGet,
     UserCreate,
     UserGet,
+    UserGetRelTasks,
     UserUpdate,
 )
 from src.core.config import settings
@@ -84,15 +85,14 @@ async def get_total_users_count_handler(session: AsyncSession = Depends(get_db))
     return total_users
 
 
-@router.get("/users", response_model=list[UserGet])
+@router.get("/get_all", response_model=list[UserGet])
 async def get_users_handler(
     session: AsyncSession = Depends(get_db),
     limit: Optional[int] = 10,
     offset: Optional[int] = 0,
     _: TokenUserData = Depends(get_current_user),
 ):
-    users = await crud.get_users(db_session=session, limit=limit, offset=offset)
-    return users
+    return await crud.get_users(db_session=session, limit=limit, offset=offset)
 
 
 @router.get("/user", response_model=UserGet)
@@ -107,6 +107,23 @@ async def get_user_handler(
         by_value = str(current_user.id)
 
     user: UserGet = await crud.get_user(
+        db_session=session, by_field=by_field.value, by_value=by_value
+    )
+    return user
+
+
+@router.get("/user_with_tasks", response_model=UserGetRelTasks)
+async def get_user_rel_tasks_handler(
+    by_value: Optional[str] = None,
+    by_field: Optional[GetUserFields] = None,
+    session: AsyncSession = Depends(get_db),
+    current_user: TokenUserData = Depends(get_current_user),
+):
+    if by_value is None:
+        by_field = GetUserFields.id
+        by_value = str(current_user.id)
+
+    user: UserGetRelTasks = await crud.get_user_rel_tasks(
         db_session=session, by_field=by_field.value, by_value=by_value
     )
     return user

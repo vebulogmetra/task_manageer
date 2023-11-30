@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import delete, exists, select, update
+from sqlalchemy import delete, exists, func, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api_v1.associates.models import UserTeam
 from src.api_v1.base.utils import is_valid_uuid
 from src.api_v1.teams.models import Team
-from src.api_v1.teams.schemas import AddUserToTeam, TeamCreate, TeamUpdate
+from src.api_v1.teams.schemas import AddUserToTeam, TeamCreate, TeamGet, TeamUpdate
 from src.utils.exceptions import custom_exc
 
 
@@ -34,14 +34,22 @@ async def add_user_to_team(db_session: AsyncSession, data: AddUserToTeam):
     await db_session.commit()
 
 
-async def get_teams(db_session: AsyncSession, limit: int, offset: int) -> list[Team]:
+async def get_total_teams(db_session: AsyncSession) -> int:
+    total_teams: int = await db_session.scalar(select(func.count(Team.id)))
+    return total_teams
+
+
+async def get_teams(db_session: AsyncSession, limit: int, offset: int) -> list[TeamGet]:
     stmt = select(Team).limit(limit).offset(offset).order_by(Team.created_at)
 
     result: Result = await db_session.execute(stmt)
     teams: list[Team] = result.scalars().unique()
     if teams is None:
         raise custom_exc.not_found(entity_name=Team.__name__)
-    return list(teams)
+    teams_dto: list[TeamGet] = [
+        TeamGet.model_validate(t, from_attributes=True) for t in teams
+    ]
+    return teams_dto
 
 
 async def get_team(db_session: AsyncSession, team_id: UUID) -> Team:

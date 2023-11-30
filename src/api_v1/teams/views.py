@@ -39,14 +39,19 @@ async def add_user_to_team_handler(
     )
 
 
-@router.get("/teams", response_model=list[TeamGet])
+@router.get("/total_count")
+async def get_total_teams_count_handler(session: AsyncSession = Depends(get_db)):
+    total_teams: int = await crud.get_total_teams(db_session=session)
+    return total_teams
+
+
+@router.get("/get_all", response_model=list[TeamGet])
 async def get_teams_handler(
     limit: Optional[int] = 100,
     offset: Optional[int] = 0,
     session: AsyncSession = Depends(get_db),
 ):
-    teams = await crud.get_teams(db_session=session, limit=limit, offset=offset)
-    return teams
+    return await crud.get_teams(db_session=session, limit=limit, offset=offset)
 
 
 @router.get("/team", response_model=TeamGet)

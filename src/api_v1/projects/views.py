@@ -45,7 +45,13 @@ async def add_user_to_project_handler(
     )
 
 
-@router.get("/projects", response_model=list[ProjectGet])
+@router.get("/total_count")
+async def get_total_projects_count_handler(session: AsyncSession = Depends(get_db)):
+    total_projects: int = await crud.get_total_projects(db_session=session)
+    return total_projects
+
+
+@router.get("/get_all", response_model=list[ProjectGet])
 async def get_projects_handler(
     limit: Optional[int] = 100,
     offset: Optional[int] = 0,

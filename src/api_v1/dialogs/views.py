@@ -27,7 +27,13 @@ async def create_dialog_handler(
     return new_dialog
 
 
-@router.get("/dialogs", response_model=list[DialogGet])
+@router.get("/total_count")
+async def get_total_dealogs_count_handler(session: AsyncSession = Depends(get_db)):
+    total_dialogs: int = await crud.get_total_dealogs(db_session=session)
+    return total_dialogs
+
+
+@router.get("/get_all", response_model=list[DialogGet])
 async def get_dialogs_handler(
     limit: Optional[int] = 10,
     offset: Optional[int] = 0,

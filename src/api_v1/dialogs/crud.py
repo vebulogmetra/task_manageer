@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -19,6 +19,11 @@ async def create_dialog(db_session: AsyncSession, dialog_data: DialogCreate) -> 
     await db_session.commit()
     await db_session.refresh(dialog)
     return dialog
+
+
+async def get_total_dialogs(db_session: AsyncSession) -> int:
+    total_dialogs: int = await db_session.scalar(select(func.count(Dialog.id)))
+    return total_dialogs
 
 
 async def get_dialogs(

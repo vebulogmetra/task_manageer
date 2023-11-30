@@ -60,7 +60,13 @@ async def add_comment_to_task_handler(
     )
 
 
-@router.get("/tasks", response_model=list[TaskGet])
+@router.get("/total_count")
+async def get_total_tasks_count_handler(session: AsyncSession = Depends(get_db)):
+    total_tasks: int = await crud.get_total_tasks(db_session=session)
+    return total_tasks
+
+
+@router.get("/get_all", response_model=list[TaskGet])
 async def get_tasks_handler(
     limit: Optional[int] = 100,
     offset: Optional[int] = 0,

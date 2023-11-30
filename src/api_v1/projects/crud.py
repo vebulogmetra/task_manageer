@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -8,7 +8,12 @@ from sqlalchemy.orm import joinedload
 from src.api_v1.associates.models import UserProject
 from src.api_v1.base.utils import is_valid_uuid
 from src.api_v1.projects.models import Project
-from src.api_v1.projects.schemas import AddUserToProject, ProjectCreate, ProjectUpdate
+from src.api_v1.projects.schemas import (
+    AddUserToProject,
+    ProjectCreate,
+    ProjectGet,
+    ProjectUpdate,
+)
 from src.utils.exceptions import custom_exc
 
 
@@ -28,9 +33,14 @@ async def add_user_to_project(db_session: AsyncSession, data: AddUserToProject):
     await db_session.commit()
 
 
+async def get_total_projects(db_session: AsyncSession) -> int:
+    total_projects: int = await db_session.scalar(select(func.count(Project.id)))
+    return total_projects
+
+
 async def get_projects(
     db_session: AsyncSession, limit: int, offset: int
-) -> list[Project]:
+) -> list[ProjectGet]:
     stmt = (
         select(Project)
         .options(joinedload(Project.users))
@@ -42,7 +52,10 @@ async def get_projects(
     projects: list[Project] = result.scalars().unique()
     if projects is None:
         raise custom_exc.not_found(entity_name=f"{Project.__name__}s")
-    return list(projects)
+    projects_dto: ProjectGet = [
+        ProjectGet.model_validate(p, from_attributes=True) for p in projects
+    ]
+    return projects_dto
 
 
 async def get_projects_by_owner(
