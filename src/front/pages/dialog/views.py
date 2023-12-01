@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,6 +21,17 @@ from src.utils.database import get_db
 router = APIRouter()
 
 
+def dialogs_to_json(dialogs: list) -> list[dict]:
+    dialogs_clean = []
+    for d in dialogs:
+        dialog_dict: dict = jsonable_encoder(d)
+        dialog_creator: dict = dialog_dict.get("creator", None)
+        if dialog_creator:
+            _ = dialog_creator.pop("hashed_password")
+        dialogs_clean.append(dialog_dict)
+    return dialogs_clean
+
+
 @router.get("/dialogs")
 async def show_dialogs_page(request: Request, session: AsyncSession = Depends(get_db)):
     response = redirect_to_login
@@ -31,11 +43,14 @@ async def show_dialogs_page(request: Request, session: AsyncSession = Depends(ge
             session=session,
             current_user=auth_data.current_user,
         )
-        dialogs = await get_dialogs_by_member_handler(
+
+        dialogs: list[dict] = await get_dialogs_by_member_handler(
             limit=10, offset=0, session=session, current_user=auth_data.current_user
         )
-        dialogs = [DialogGet.model_validate(d) for d in dialogs]
-        context = {"request": request, "user": user, "dialogs": dialogs}
+        # dialogs = [DialogGet.model_validate(d) for d in dialogs]
+        dialogs_dict: list[dict] = dialogs_to_json(dialogs=dialogs)
+        user_dict: dict = jsonable_encoder(user)
+        context = {"request": request, "user": user_dict, "dialogs": dialogs_dict}
         response = html_templates.TemplateResponse("dialogs.html", context=context)
     return response
 

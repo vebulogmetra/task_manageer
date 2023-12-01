@@ -93,16 +93,7 @@ async def get_dialogs_by_member(
 
     result = await db_session.execute(query)
     dialogs = result.scalars().unique()
-    if not dialogs:
-        raise custom_exc.not_found(entity_name=f"{Dialog.__name__}s")
-    dialogs_clean = []
-    for d in dialogs:
-        dialog_dict: dict = jsonable_encoder(d)
-        dialog_creator: dict = dialog_dict.get("creator", None)
-        if dialog_creator:
-            _ = dialog_creator.pop("hashed_password")
-        dialogs_clean.append(dialog_dict)
-    return dialogs_clean
+    return dialogs
 
 
 async def get_dialog(db_session: AsyncSession, dialog_id: UUID) -> Dialog | None:
