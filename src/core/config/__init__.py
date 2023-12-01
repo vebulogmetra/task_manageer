@@ -33,7 +33,7 @@ class Config(BaseSettings):
     app_port: int
     app_workers_count: int
     app_title: str = "API for TaskManageer"
-    app_version: str = "0.1.2"
+    app_version: str = "0.1.3"
     api_v1_prefix: str = "/api/v1"
     front_prefix: str = "/front/pages"
     cookie_name_access: str = "access_token"
