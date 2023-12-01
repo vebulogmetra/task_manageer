@@ -2,24 +2,24 @@
 
 {% block nav_home %}active{% endblock %}
 
-{% block content %}
-
 {% block title %}
 <title>Home page</title>
 {% endblock %}
-<h1>Home page 🏡</h1>
 
-<p>Welcome to the home page.</p>
 
-{% if user %}
-    <h2>You are logged in :)</h2>
-    <p>You can go to your account <a href="/front/pages/account">Account</a>!</p>
-{% else %}
-    <h2>You are not logged in :(</h2>
-    <p>
-    Please follow the link to <a href="/front/pages/login">Login</a>!
-    </p>
-{% endif %}
+{% block content %}
+
+<div class="p-5">
+    <h5 class="font-monospace"><b>Task Manageer</b> - это инструмент для управления задачами с возможностью отслеживания статуса, приоритета и сроков выполнения задач.</h5>
+    <br>
+    <div class="text-center">
+    {% if user %}
+        <a class="btn btn-primary" href="/front/pages/account" role="button">Your account</a>
+    {% else %}
+        <a class="btn btn-primary" href="/front/pages/signup" role="button">Register</a>
+    {% endif %}
+    <a class="btn btn-dark" href="https://github.com/vebulogmetra/task_manageer" role="button">Github</a>
+    </div>
+</div>
+
 {% endblock %}
-
-<hr>

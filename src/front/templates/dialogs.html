@@ -60,40 +60,12 @@
         let current_user = {{ user | tojson | safe }};
         let ws;
 
-        // let user_id = current_user.id;
-        // let dialog_id = document.getElementById("current_dialog_id").value;
-        // console.log("user_id: ", user_id)
-        // console.log("dialog_id: ", dialog_id)
-
-        // let ws = new WebSocket(`ws://localhost:8000/api/v1/chat/ws/${dialog_id}/${user_id}`);
-        // ws.onmessage = function(event) {
-        //     let messagesDiv = document.getElementById("chat-box");
-        //     let messageContent = document.createElement('div');
-        //     let messageTime = document.createElement('p');
-        //     let mediaBody = document.createElement('div');
-
-        //     mediaBody.className = 'media-body ml-3';
-        //     messageContent.className = 'bg-light rounded py-2 px-3 mb-2';
-        //     messageContent.innerHTML = '<p class="text-small mb-0 text-muted">' + event.data + '</p>';
-        //     messageDiv.className += ' ml-auto';
-        //     messageContent.className = 'bg-primary rounded py-2 px-3 mb-2';
-        //     messageContent.innerHTML = '<p class="text-small mb-0 text-white">' + event.data + '</p>';
-        //     messageTime.className = 'small text-muted';
-        //     messageTime.innerHTML = new Date().toISOString().slice(0, 19).replace("T", " ");
-
-        //     mediaBody.appendChild(messageContent);
-        //     mediaBody.appendChild(messageTime);
-        //     messageDiv.appendChild(mediaBody);
-        //     messagesDiv.appendChild(messageDiv);
-        // };
-
         function sendMessage(event) {
             let input = document.getElementById("messageText");
             ws.send(input.value);
             input.value = '';
             event.preventDefault();
         }
-
 
         function showMessages(dialogId) {
             // Прокидываем id текущего диалога в скрытый элемент
@@ -124,8 +96,6 @@
                 messageDiv.appendChild(mediaBody);
                 messagesDiv.appendChild(messageDiv);
             };
-
-
 
             let messagesDiv = document.getElementById("chat-box");
             messagesDiv.innerHTML = ''; // Clear previous messages
@@ -159,6 +129,8 @@
                 messageDiv.appendChild(mediaBody);
                 messagesDiv.appendChild(messageDiv);
             };
+            let chatContainer = document.querySelector('#chat-box');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         };
     </script>
 {% endblock %}

@@ -47,10 +47,14 @@ async def show_dialogs_page(request: Request, session: AsyncSession = Depends(ge
         dialogs: list[dict] = await get_dialogs_by_member_handler(
             limit=10, offset=0, session=session, current_user=auth_data.current_user
         )
-        # dialogs = [DialogGet.model_validate(d) for d in dialogs]
         dialogs_dict: list[dict] = dialogs_to_json(dialogs=dialogs)
         user_dict: dict = jsonable_encoder(user)
-        context = {"request": request, "user": user_dict, "dialogs": dialogs_dict}
+        context = {
+            "logged_in": True,
+            "request": request,
+            "user": user_dict,
+            "dialogs": dialogs_dict,
+        }
         response = html_templates.TemplateResponse("dialogs.html", context=context)
     return response
 
