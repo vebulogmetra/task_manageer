@@ -60,7 +60,7 @@
             <h5 class="my-3">{{ user.first_name }} {{ user.last_name }}</h5>
             <p class="text-muted mb-1">{{ user.position }}</p>
             <div class="d-flex justify-content-center mb-2">
-              <button type="button" class="btn btn-outline-primary ms-1">Message</button>
+              <a href="/front/pages/dialog/new/{{ current_user.id }}/{{ user.id }}" role="button" class="btn btn-outline-primary ms-1">Message</a>
             </div>
           </div>
         </div>
