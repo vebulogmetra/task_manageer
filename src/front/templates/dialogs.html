@@ -36,6 +36,7 @@
                                         </div>
                                     </a>
                                 {% endfor %}
+                                <a href="/front/pages/user/all" role="button" class="btn btn-info"><b>+</b> Новый диалог</a>
                             </div>
                         </div>
                     </div>
@@ -119,7 +120,7 @@
                     messageContent.className = 'bg-primary rounded py-2 px-3 mb-2';
                     messageContent.innerHTML = '<p class="text-small mb-0 text-white">' + message.content + '</p>';
                 } else {
-                    messageContent.innerHTML = '<p class="text-small mb-0 text-muted">' + message.content + '</p>';
+                    messageContent.innerHTML = '<p><b>' + message.sender.username + '</b></p><p class="text-small mb-0 text-muted">' + message.content + '</p>';
                 }
                 let messageTime = document.createElement('p');
                 messageTime.className = 'small text-muted';
