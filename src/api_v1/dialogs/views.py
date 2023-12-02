@@ -7,6 +7,7 @@ from src.api_v1.auth.schemas import TokenUserData
 from src.api_v1.auth.service import get_current_user
 from src.api_v1.base.schemas import StatusMsg
 from src.api_v1.dialogs import crud
+from src.api_v1.dialogs.models import Dialog
 from src.api_v1.dialogs.schemas import DialogCreate, DialogGet, MessageCreate
 from src.utils.database import get_db
 from src.utils.websocket import ws_manager
@@ -23,7 +24,16 @@ async def create_dialog_handler(
     if dialog_data.creator_id is None:
         dialog_data.creator_id = current_user.id
 
-    new_dialog = await crud.create_dialog(db_session=session, dialog_data=dialog_data)
+    new_dialog: Dialog = await crud.create_dialog(
+        db_session=session, dialog_data=dialog_data
+    )
+    # Добавляем первое сообщение в диалог (для корректной работы jinja шаблона)
+    message_data: MessageCreate = MessageCreate(
+        dialog_id=new_dialog.id,
+        sender_id=current_user.id,
+        content="Привет! Приглашаю тебя в диалог.",
+    )
+    await crud.add_message(db_session=session, message_data=message_data)
     return new_dialog
 
 

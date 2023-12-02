@@ -84,6 +84,7 @@ async def show_user_page(
         context = {
             "logged_in": True,
             "user": UserGet.model_validate(user),
+            "current_user": auth_data.current_user,
             "request": request,
         }
         response = html_templates.TemplateResponse("user.html", context)

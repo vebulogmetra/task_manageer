@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import func, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -113,6 +113,38 @@ async def get_dialog(db_session: AsyncSession, dialog_id: UUID) -> Dialog | None
     dialog = result.scalar()
     if dialog is None:
         raise custom_exc.not_found(entity_name=Dialog.__name__)
+    dialog_dict: dict = jsonable_encoder(dialog)
+    dialog_creator: dict = dialog_dict.get("creator", None)
+    if dialog_creator:
+        _ = dialog_creator.pop("hashed_password")
+    return dialog_dict
+
+
+async def get_dialog_by_members(
+    db_session: AsyncSession, user_1: UUID, user_2: UUID
+) -> Dialog | None:
+    is_uuid_1: bool = is_valid_uuid(value=user_1)
+    is_uuid_2: bool = is_valid_uuid(value=user_2)
+    if is_uuid_1 is False or is_uuid_2 is False:
+        raise custom_exc.invalid_input(detail="user id must by valid type UUID4")
+    stmt = (
+        select(Dialog)
+        .options(
+            selectinload(Dialog.creator),
+            selectinload(Dialog.interlocutor),
+            selectinload(Dialog.messages),
+        )
+        .where(
+            and_(
+                Dialog.creator_id.in_([user_1, user_2]),
+                Dialog.interlocutor_id.in_([user_1, user_2]),
+            )
+        )
+    )
+    result: Result = await db_session.execute(stmt)
+    dialog = result.scalar()
+    if dialog is None:
+        return dialog
     dialog_dict: dict = jsonable_encoder(dialog)
     dialog_creator: dict = dialog_dict.get("creator", None)
     if dialog_creator:
