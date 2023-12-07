@@ -1,0 +1,16 @@
+stages:
+  - build
+  - test
+  - deploy
+
+print_message:
+  #image: python3.10-slim:latest
+  stage: build
+  before_script:
+    - echo "before script running"
+  script:
+    - echo "script 1"
+    - echo "script 2"
+    - echo "script 3"
+  after_script:
+    - echo "after script running"
