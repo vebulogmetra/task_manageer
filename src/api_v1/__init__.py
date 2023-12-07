@@ -4,7 +4,7 @@ from src.api_v1.associates.models import UserProject, UserTask, UserTeam
 from src.api_v1.auth.views import router as auth_router
 from src.api_v1.base.models import Base
 from src.api_v1.dialogs.models import Dialog, Message
-from src.api_v1.dialogs.views import router as chat_router
+from src.api_v1.dialogs.views import router as dialogs_router
 from src.api_v1.projects.models import Project
 from src.api_v1.projects.views import router as projects_router
 from src.api_v1.tasks.models import Task, TaskComment
@@ -31,12 +31,6 @@ __all__ = (
 
 main_router: APIRouter = APIRouter()
 
-main_router.include_router(
-    router=chat_router,
-    prefix="/chat",
-    tags=["Chat"],
-)
-
 
 main_router.include_router(
     router=auth_router,
@@ -49,6 +43,13 @@ main_router.include_router(
     prefix="/users",
     tags=["Users"],
 )
+
+main_router.include_router(
+    router=dialogs_router,
+    prefix="/dialog",
+    tags=["Dialogs"],
+)
+
 main_router.include_router(
     router=projects_router,
     prefix="/projects",
