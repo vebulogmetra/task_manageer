@@ -20,6 +20,14 @@ Task Manager - это инструмент для управления зада�
 ```shell
    cd task_manageer
 ```
+- Заполнить файл с переменными окружения
+
+```shell
+   vim task_manageer/src/core/config/env-example
+```
+```shell
+   mv task_manageer/src/core/config/env-example task_manageer/src/core/config/.env
+```
 ```shell
    make d-build
 ```
