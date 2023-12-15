@@ -1,4 +1,4 @@
-from os import path
+from os import path, getenv
 from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
@@ -41,12 +41,8 @@ class Config(BaseSettings):
     html_staticfiles_path: str = "src/front/static"
     html_templates_path: str = "src/front/templates"
 
-    db_host: str
-    db_port: int
-    db_user: str
-    db_name: str
-    db_password: str
     db_alchemy_url: str
+    db_alchemy_url_docker: str
 
     test_db_host: str
     test_db_port: int
@@ -92,3 +88,8 @@ logger.add(
     retention="7 days",
     level="INFO",
 )
+
+# Изменение подключения к БД при запуске в docker
+
+if getenv("DOKERIZE") == "True":
+    settings.db_alchemy_url = settings.db_alchemy_url_docker
