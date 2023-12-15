@@ -1,0 +1,58 @@
+version: '3'
+services:
+  es:
+    image: elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - task_manageer_app
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    env_file:
+      - ./src/core/config/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      # - ./ddl_pg.sql:/docker-entrypoint-initdb.d/ddl_pg.sql
+    ports:
+      - "5439:5432"
+    networks:
+      - task_manageer_app
+
+  task_manageer:
+    build: .
+    environment:
+      - DOKERIZE=True
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ALEMBIC_DIR=/app/alembic
+    command: /bin/sh -c "alembic upgrade head && python ."
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - task_manageer_app
+    depends_on:
+      - es
+      - postgres
+
+
+volumes:
+  esdata:
+    driver: local
+  postgres_data:
+    driver: local
+networks:
+  task_manageer_app:
+    driver: bridge
