@@ -14,7 +14,6 @@
 
     <div class="container py-5 px-4">
         <div class="row rounded-lg overflow-hidden shadow">
-            {% if dialogs %}
                 <div class="col-5 px-0">
                     <div class="bg-white">
                         <div class="bg-gray px-4 py-2 bg-light">
@@ -22,6 +21,7 @@
                         </div>
                         <div class="messages-box">
                             <div class="list-group rounded-0">
+                                {% if dialogs %}
                                 {% for dialog in dialogs %}
                                     <a href="#" onclick="showMessages('{{ dialog.id }}')" class="list-group-item list-group-item-action list-group-item-light rounded-0">
                                         <div class="media">
@@ -36,12 +36,12 @@
                                         </div>
                                     </a>
                                 {% endfor %}
+                                {% endif %}
                                 <a href="/front/pages/user/all" role="button" class="btn btn-info"><b>+</b> Новый диалог</a>
                             </div>
                         </div>
                     </div>
                 </div>
-            {% endif %}
             <div class="col-7 px-0">
                 <div class="px-4 py-5 chat-box bg-white" id="chat-box">
                 </div>

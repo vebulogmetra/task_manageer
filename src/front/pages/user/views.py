@@ -62,6 +62,7 @@ async def show_users_page(
             "users": [UserGet.model_validate(u) for u in users],
             "page": page,
             "total_pages": total_pages,
+            "current_user": auth_data.current_user,
             "request": request,
         }
         response = html_templates.TemplateResponse("user.html", context)
