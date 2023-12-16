@@ -33,7 +33,7 @@ class Config(BaseSettings):
     app_port: int
     app_workers_count: int
     app_title: str = "API for TaskManageer"
-    app_version: str = "0.1.3"
+    app_version: str = "0.1.4"
     api_v1_prefix: str = "/api/v1"
     front_prefix: str = "/front/pages"
     cookie_name_access: str = "access_token"
@@ -76,6 +76,9 @@ class Config(BaseSettings):
     smtp_username: str
     smtp_password: str
 
+    elasticsearch_url: str
+    elasticsearch_url_docker: str
+
 
 settings = Config()
 
@@ -89,7 +92,8 @@ logger.add(
     level="INFO",
 )
 
-# Изменение подключения к БД при запуске в docker
+# Изменение подключения к сервисам при запуске в docker
 
 if getenv("DOKERIZE") == "True":
     settings.db_alchemy_url = settings.db_alchemy_url_docker
+    settings.elasticsearch_url = settings.elasticsearch_url_docker
