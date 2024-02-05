@@ -43,6 +43,3 @@ Task Manager - это инструмент для управления зада�
 ```shell
    make d-run-tests
 ```
-
-[Web UI](http://0.0.0.0:8000/front/pages/signup)
-[API Docs](http://0.0.0.0:8000/docs)
